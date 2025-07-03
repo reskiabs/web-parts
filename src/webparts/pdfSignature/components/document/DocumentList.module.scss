@@ -1,0 +1,47 @@
+.documentList {
+  padding: 1rem;
+}
+
+.fileContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fileItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px 12px;
+  background-color: #fff;
+}
+
+.fileInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.fileName {
+  font-weight: 500;
+  max-width: 500px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.signButton {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 12px;
+
+  &:hover {
+    background: #f3f3f3;
+  }
+}
