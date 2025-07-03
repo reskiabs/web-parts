@@ -1,0 +1,18 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "22.14.0",
+    "sdksVersions": {},
+    "version": "1.21.1",
+    "libraryName": "pdf-signature",
+    "libraryId": "aebba5e0-2b4b-404b-ab8b-7037ed555fe0",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "pdf-signature",
+    "solutionShortDescription": "pdf-signature description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}

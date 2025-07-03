@@ -1,0 +1,50 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "pdf-signature-client-side-solution",
+    "id": "aebba5e0-2b4b-404b-ab8b-7037ed555fe0",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.21.1"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "pdf-signature description"
+      },
+      "longDescription": {
+        "default": "pdf-signature description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "pdf-signature Feature",
+        "description": "The feature that activates elements of the pdf-signature solution.",
+        "id": "d15d2378-521a-4f73-8642-e6700a5b84c6",
+        "version": "1.0.0.0"
+      }
+    ],
+    "webApiPermissionRequests": [
+      {
+        "resource": "Microsoft Graph",
+        "scope": "User.Read.All"
+      },
+      {
+        "resource": "Microsoft Graph",
+        "scope": "Files.Read.All"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/pdf-signature.sppkg"
+  }
+}
