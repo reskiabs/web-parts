@@ -1,0 +1,47 @@
+@import "~@fluentui/react/dist/sass/References.scss";
+
+.container {
+  overflow: hidden;
+  color: "[theme:bodyText, default: #323130]";
+  color: var(--bodyText);
+
+  &.teams {
+    font-family: $ms-font-family-fallbacks;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fileName {
+  font-weight: 500;
+  max-width: 500px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.signer {
+  margin-bottom: 20px;
+}
+
+.actionContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.lanjutButton {
+  width: 200px;
+  background-color: #0284c7;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}

@@ -1,4 +1,4 @@
-import { MSGraphClientV3 } from "@microsoft/sp-http";
+import { MSGraphClientFactory, MSGraphClientV3 } from "@microsoft/sp-http";
 import { useEffect, useState } from "react";
 
 export interface ISharedFile {
@@ -8,11 +8,21 @@ export interface ISharedFile {
   lastModifiedDateTime: string;
 }
 
-export const useSharedFiles = (msGraphClientFactory: any) => {
-  const [sharedFiles, setSharedFiles] = useState<ISharedFile[]>([]);
-  const [loading, setLoading] = useState(true);
+interface UseSharedFilesResult {
+  sharedFiles: ISharedFile[];
+  loading: boolean;
+  fetchSharedFiles: () => void;
+  getFileById: (fileId: string) => ISharedFile | undefined;
+}
 
-  useEffect(() => {
+export const useSharedFiles = (
+  msGraphClientFactory: MSGraphClientFactory
+): UseSharedFilesResult => {
+  const [sharedFiles, setSharedFiles] = useState<ISharedFile[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const fetchSharedFiles = (): void => {
+    setLoading(true);
     msGraphClientFactory
       .getClient("3")
       .then((client: MSGraphClientV3) =>
@@ -25,11 +35,24 @@ export const useSharedFiles = (msGraphClientFactory: any) => {
         setSharedFiles(pdfFiles);
         setLoading(false);
       })
-      .catch((err: any) => {
-        console.error("Failed to fetch shared files", err);
+      .catch((error: unknown) => {
+        console.error("Failed to fetch shared files", error);
         setLoading(false);
       });
+  };
+
+  const getFileById = (fileId: string): ISharedFile | undefined => {
+    return sharedFiles.find((file) => file.id === fileId);
+  };
+
+  useEffect(() => {
+    fetchSharedFiles();
   }, [msGraphClientFactory]);
 
-  return { sharedFiles, loading };
+  return {
+    sharedFiles,
+    loading,
+    fetchSharedFiles,
+    getFileById,
+  };
 };

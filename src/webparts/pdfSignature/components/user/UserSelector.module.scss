@@ -3,12 +3,160 @@
   font-size: 14px;
   width: 100%;
   max-width: 300px;
-  margin-top: 10px;
 }
 
-.userDetail {
-  margin-top: 20px;
-  background-color: #f4f4f4;
-  padding: 12px;
+.selectedUserList {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  list-style: none;
+  margin: 0;
+}
+
+.selectedUserItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f5f5f5;
+  padding: 8px 10px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.removeButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #666;
+
+  &:hover {
+    color: #ff4d4f;
+  }
+}
+
+.checkboxList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checkboxItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.dropdownContainer {
+  position: relative;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+}
+
+.dropdownToggle {
+  width: 50%;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #ccc;
   border-radius: 6px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.dropdownMenu {
+  width: 50%;
+  max-height: 200px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-top: 4px;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.checkboxList {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checkboxItem {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 4px;
+  font-size: 14px;
+}
+
+.emptyText {
+  padding: 10px;
+  font-size: 13px;
+  color: #888;
+  text-align: center;
+}
+
+.actionGroup {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 8px 10px;
+}
+.actionButton {
+  border: 1px solid #6b7280;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+
+  &:hover {
+    background-color: #f9f9f9;
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.selectedUserItemSign {
+  border: 2px solid #0284c7; // biru
+  box-shadow: 0 2px 6px rgba(0, 132, 199, 0.2);
+  background: #f0faff;
+}
+
+.activeAction {
+  border-color: #0284c7;
+  background-color: #e0f3fc;
+
+  &:hover {
+    background-color: #d2ecfa;
+  }
 }

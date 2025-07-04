@@ -1,53 +1,195 @@
+import {
+  ChevronDown,
+  ChevronUp,
+  FilePenLine,
+  Search,
+  Signature,
+  X,
+} from "lucide-react";
 import * as React from "react";
 import { IUser } from "../../hooks/useUsers";
 import styles from "./UserSelector.module.scss";
 
 interface UserSelectorProps {
   users: IUser[];
-  selectedUserId: string;
-  onChange: (userId: string) => void;
+  selectedUserIds: string[];
+  onChange: (userIds: string[]) => void;
+  isSign?: boolean;
 }
 
 const UserSelector: React.FC<UserSelectorProps> = ({
   users,
-  selectedUserId,
+  selectedUserIds,
   onChange,
+  isSign = false,
 }) => {
-  const selectedUser = users.find((u) => u.id === selectedUserId);
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [signType, setSignType] = React.useState<
+    "signature" | "initials" | null
+  >(null);
+  const [selectedUserId, setSelectedUserId] = React.useState<string | null>(
+    null
+  );
+
+  const handleCheckboxChange = (userId: string): void => {
+    if (selectedUserIds.includes(userId)) {
+      const updated = selectedUserIds.filter((id) => id !== userId);
+      onChange(updated);
+      if (selectedUserId === userId) {
+        setSelectedUserId(null); // unselect jika user yang dipilih dihapus
+      }
+    } else {
+      onChange([...selectedUserIds, userId]);
+    }
+  };
+
+  const handleRemoveUser = (userId: string): void => {
+    const updated = selectedUserIds.filter((id) => id !== userId);
+    onChange(updated);
+    if (selectedUserId === userId) {
+      setSelectedUserId(null);
+    }
+  };
+
+  const handleUserClick = (userId: string): void => {
+    setSelectedUserId(selectedUserId === userId ? null : userId);
+  };
+
+  const selectedUsers = users.filter((u) => selectedUserIds.includes(u.id));
+
+  const filteredUsers = users.filter(
+    (user) =>
+      user.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.mail || "").toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div>
-      <h2>Pilih User dari Organisasi</h2>
+      <h2>{isSign ? "Tanda Tangani" : "Undang Penandatangan"}</h2>
 
-      {users.length === 0 ? (
-        <p>Memuat data pengguna...</p>
-      ) : (
-        <select
-          onChange={(e) => onChange(e.target.value)}
-          value={selectedUserId}
-          className={styles.selectBox}
-        >
-          <option value="">-- Pilih user --</option>
-          {users.map((user) => (
-            <option key={user.id} value={user.id}>
-              {user.displayName} ({user.mail || "no email"})
-            </option>
-          ))}
-        </select>
+      {!isSign && (
+        <div className={styles.dropdownContainer}>
+          <button
+            type="button"
+            className={styles.dropdownToggle}
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          >
+            {selectedUsers.length > 0
+              ? `${selectedUsers.length} Pengguna dipilih`
+              : "Pilih pengguna"}
+            {isDropdownOpen ? (
+              <ChevronUp size={16} />
+            ) : (
+              <ChevronDown size={16} />
+            )}
+          </button>
+
+          {isDropdownOpen && (
+            <div className={styles.dropdownMenu}>
+              {users.length === 0 ? (
+                <p>Memuat data pengguna...</p>
+              ) : (
+                <>
+                  <div className={styles.searchBox}>
+                    <Search size={14} />
+                    <input
+                      type="text"
+                      placeholder="Cari pengguna..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className={styles.searchInput}
+                    />
+                  </div>
+
+                  <div className={styles.checkboxList}>
+                    {filteredUsers.length === 0 ? (
+                      <p className={styles.emptyText}>
+                        Pengguna tidak ditemukan
+                      </p>
+                    ) : (
+                      filteredUsers.map((user) => (
+                        <label key={user.id} className={styles.checkboxItem}>
+                          <input
+                            type="checkbox"
+                            checked={selectedUserIds.includes(user.id)}
+                            onChange={() => handleCheckboxChange(user.id)}
+                          />
+                          <strong>{user.displayName}</strong> (
+                          {user.mail || "no email"})
+                        </label>
+                      ))
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       )}
 
-      {selectedUser && (
-        <div className={styles.userDetail}>
-          <h3>Detail Pengguna:</h3>
-          <p>
-            <strong>Nama:</strong> {selectedUser.displayName}
-          </p>
-          <p>
-            <strong>Email:</strong> {selectedUser.mail || "Tidak tersedia"}
-          </p>
-          <p>
-            <strong>ID:</strong> {selectedUser.id}
-          </p>
+      {!isSign && selectedUsers.length > 0 && (
+        <ul className={styles.selectedUserList}>
+          {selectedUsers.map((user) => (
+            <li key={user.id} className={styles.selectedUserItem}>
+              <div>
+                <strong>{user.displayName}</strong>
+                <p>{user.mail || "no email"}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleRemoveUser(user.id)}
+                className={styles.removeButton}
+                title="Hapus"
+              >
+                <X size={16} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {isSign && selectedUsers.length > 0 && (
+        <ul className={styles.selectedUserList}>
+          {selectedUsers.map((user) => (
+            <li
+              key={user.id}
+              className={`${styles.selectedUserItem} ${
+                selectedUserId === user.id ? styles.selectedUserItemSign : ""
+              }`}
+              onClick={() => handleUserClick(user.id)}
+              style={{ cursor: "pointer" }}
+            >
+              <div>
+                <strong>{user.displayName}</strong>
+                <p>{user.mail || "no email"}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {isSign && selectedUsers.length > 0 && (
+        <div className={styles.actionGroup}>
+          <button
+            className={`${styles.actionButton} ${
+              signType === "signature" ? styles.activeAction : ""
+            }`}
+            onClick={() => setSignType("signature")}
+          >
+            <Signature size={18} />
+            Tanda Tangani
+          </button>
+
+          <button
+            className={`${styles.actionButton} ${
+              signType === "initials" ? styles.activeAction : ""
+            }`}
+            onClick={() => setSignType("initials")}
+          >
+            <FilePenLine size={18} />
+            Paraf
+          </button>
         </div>
       )}
     </div>
