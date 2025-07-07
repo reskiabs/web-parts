@@ -1,7 +1,7 @@
 import { CircleArrowLeft } from "lucide-react";
 import * as React from "react";
 import { Document, Page, pdfjs } from "react-pdf";
-import { Rnd } from "react-rnd"; // ✅ react-rnd di sini
+import { Rnd } from "react-rnd";
 import { useLocation, useParams } from "react-router-dom";
 import { IPdfSignatureProps } from "../../components/IPdfSignatureProps";
 import UserSelector from "../../components/user/UserSelector";
@@ -25,16 +25,16 @@ const DocumentPage: React.FC<IPdfSignatureProps> = ({ context }) => {
   const { loading, getFileById } = useSharedFiles(context.msGraphClientFactory);
   const { users } = useUsers(context.msGraphClientFactory);
   const [selectedUserIds, setSelectedUserIds] = React.useState<string[]>([]);
-  const [isSign, setIsSign] = React.useState<boolean>(false);
+  const [signaturePositions, setSignaturePositions] = React.useState<
+    Record<string, { x: number; y: number; width: number; height: number }>
+  >({});
 
-  // const [numPages, setNumPages] = React.useState<number>(0);
+  const [isSign, setIsSign] = React.useState<boolean>(false);
+  const [signType, setSignType] = React.useState<
+    "signature" | "initials" | null
+  >(null);
+
   const [pageNumber, setPageNumber] = React.useState<number>(1);
-  const [signaturePosition, setSignaturePosition] = React.useState({
-    x: 100,
-    y: 100,
-    width: 250,
-    height: 200,
-  });
 
   const topRef = React.useRef<HTMLDivElement>(null);
 
@@ -43,20 +43,27 @@ const DocumentPage: React.FC<IPdfSignatureProps> = ({ context }) => {
     topRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const handleUserChange = (newUserIds: string[]) => {
+    setSelectedUserIds(newUserIds);
+
+    setSignaturePositions((prev) => {
+      const updated = { ...prev };
+      Object.keys(updated).forEach((userId) => {
+        if (!newUserIds.includes(userId)) {
+          delete updated[userId];
+        }
+      });
+      return updated;
+    });
+  };
+
   const fileFromState = location.state?.file;
   const fileFromId = getFileById(fileId);
   const file = fileFromState || fileFromId;
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }): void => {
-    // setNumPages(numPages);
     setPageNumber(1);
   };
-
-  // const goToPrevPage = (): void =>
-  //   setPageNumber((prev) => Math.max(prev - 1, 1));
-
-  // const goToNextPage = (): void =>
-  //   setPageNumber((prev) => Math.min(prev + 1, numPages));
 
   if (loading) {
     return <div className={styles.container}>Memuat file...</div>;
@@ -81,8 +88,10 @@ const DocumentPage: React.FC<IPdfSignatureProps> = ({ context }) => {
         <UserSelector
           users={users}
           selectedUserIds={selectedUserIds}
-          onChange={setSelectedUserIds}
           isSign={isSign}
+          signType={signType}
+          setSignType={setSignType}
+          onChange={handleUserChange}
         />
       </div>
 
@@ -93,54 +102,68 @@ const DocumentPage: React.FC<IPdfSignatureProps> = ({ context }) => {
           loading="Memuat PDF..."
           error="Gagal memuat PDF"
         >
-          <Page pageNumber={pageNumber} width={800} />
+          <Page
+            pageNumber={pageNumber}
+            width={800}
+            renderTextLayer={false}
+            renderAnnotationLayer={false}
+          />
         </Document>
 
-        {isSign && (
-          <Rnd
-            size={{
-              width: signaturePosition.width,
-              height: signaturePosition.height,
-            }}
-            position={{ x: signaturePosition.x, y: signaturePosition.y }}
-            onDragStop={(e, d) => {
-              setSignaturePosition((prev) => ({ ...prev, x: d.x, y: d.y }));
-            }}
-            onResizeStop={(e, direction, ref, delta, position) => {
-              setSignaturePosition({
-                width: parseInt(ref.style.width),
-                height: parseInt(ref.style.height),
-                ...position,
-              });
-            }}
-            bounds="parent"
-            style={{
-              border: "2px dashed #0078D4",
-              background: "rgba(0, 120, 212, 0.1)",
-              color: "#0078D4",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              fontWeight: "bold",
-              cursor: "move",
-              borderRadius: "4px",
-            }}
-          >
-            Tanda Tangan
-          </Rnd>
-        )}
+        {signType === "signature" &&
+          selectedUserIds.map((userId) => {
+            const position = signaturePositions[userId] || {
+              x: 100,
+              y: 100,
+              width: 250,
+              height: 100,
+            };
 
-        {/* <div className={styles.pagination}>
-          <button onClick={goToPrevPage} disabled={pageNumber <= 1}>
-            Previous
-          </button>
-          <span>
-            Page {pageNumber} of {numPages}
-          </span>
-          <button onClick={goToNextPage} disabled={pageNumber >= numPages}>
-            Next
-          </button>
-        </div> */}
+            return (
+              <Rnd
+                key={userId}
+                size={{ width: position.width, height: position.height }}
+                position={{ x: position.x, y: position.y }}
+                onDragStop={(e, d) => {
+                  setSignaturePositions((prev) => ({
+                    ...prev,
+                    [userId]: {
+                      ...prev[userId],
+                      x: d.x,
+                      y: d.y,
+                      width: prev[userId]?.width ?? 250,
+                      height: prev[userId]?.height ?? 100,
+                    },
+                  }));
+                }}
+                onResizeStop={(e, direction, ref, delta, pos) => {
+                  setSignaturePositions((prev) => ({
+                    ...prev,
+                    [userId]: {
+                      x: pos.x,
+                      y: pos.y,
+                      width: parseInt(ref.style.width),
+                      height: parseInt(ref.style.height),
+                    },
+                  }));
+                }}
+                bounds="parent"
+                style={{
+                  border: "2px dashed #0078D4",
+                  background: "rgba(0, 120, 212, 0.1)",
+                  color: "#0078D4",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  fontWeight: "bold",
+                  cursor: "move",
+                  borderRadius: "4px",
+                }}
+              >
+                Tanda Tangan {userId}
+              </Rnd>
+            );
+          })}
       </div>
 
       <div className={styles.actionContainer}>

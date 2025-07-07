@@ -15,6 +15,10 @@ interface UserSelectorProps {
   selectedUserIds: string[];
   onChange: (userIds: string[]) => void;
   isSign?: boolean;
+  signType: "signature" | "initials" | null;
+  setSignType: React.Dispatch<
+    React.SetStateAction<"signature" | "initials" | null>
+  >;
 }
 
 const UserSelector: React.FC<UserSelectorProps> = ({
@@ -22,13 +26,12 @@ const UserSelector: React.FC<UserSelectorProps> = ({
   selectedUserIds,
   onChange,
   isSign = false,
+  signType,
+  setSignType,
 }) => {
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState("");
-  const [signType, setSignType] = React.useState<
-    "signature" | "initials" | null
-  >(null);
   const [selectedUserId, setSelectedUserId] = React.useState<string | null>(
     null
   );
