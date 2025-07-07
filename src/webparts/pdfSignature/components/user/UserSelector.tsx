@@ -23,6 +23,7 @@ const UserSelector: React.FC<UserSelectorProps> = ({
   onChange,
   isSign = false,
 }) => {
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [signType, setSignType] = React.useState<
@@ -64,12 +65,28 @@ const UserSelector: React.FC<UserSelectorProps> = ({
       (user.mail || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent): void => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div>
       <h2>{isSign ? "Tanda Tangani" : "Undang Penandatangan"}</h2>
 
       {!isSign && (
-        <div className={styles.dropdownContainer}>
+        <div className={styles.dropdownContainer} ref={dropdownRef}>
           <button
             type="button"
             className={styles.dropdownToggle}
