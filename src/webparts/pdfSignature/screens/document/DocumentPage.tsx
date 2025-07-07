@@ -1,3 +1,4 @@
+import * as dayjs from "dayjs";
 import { CircleArrowLeft } from "lucide-react";
 import * as React from "react";
 import { Document, Page, pdfjs } from "react-pdf";
@@ -25,10 +26,13 @@ const DocumentPage: React.FC<IPdfSignatureProps> = ({ context }) => {
   const { loading, getFileById } = useSharedFiles(context.msGraphClientFactory);
   const { users } = useUsers(context.msGraphClientFactory);
   const [selectedUserIds, setSelectedUserIds] = React.useState<string[]>([]);
+  const [signedUserIds, setSignedUserIds] = React.useState<string[]>([]);
   const [signaturePositions, setSignaturePositions] = React.useState<
     Record<string, { x: number; y: number; width: number; height: number }>
   >({});
-
+  const [selectedUserId, setSelectedUserId] = React.useState<string | null>(
+    null
+  );
   const [isSign, setIsSign] = React.useState<boolean>(false);
   const [signType, setSignType] = React.useState<
     "signature" | "initials" | null
@@ -36,14 +40,25 @@ const DocumentPage: React.FC<IPdfSignatureProps> = ({ context }) => {
 
   const [pageNumber, setPageNumber] = React.useState<number>(1);
 
+  const isUserSigned = selectedUserId
+    ? signedUserIds.includes(selectedUserId)
+    : false;
+
   const topRef = React.useRef<HTMLDivElement>(null);
 
-  const handleSign = (): void => {
+  const handleNext = (): void => {
     setIsSign(true);
     topRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleUserChange = (newUserIds: string[]) => {
+  const handleSign = (): void => {
+    if (!selectedUserId) return;
+    if (!signedUserIds.includes(selectedUserId)) {
+      setSignedUserIds((prev) => [...prev, selectedUserId]);
+    }
+  };
+
+  const handleUserChange = (newUserIds: string[]): void => {
     setSelectedUserIds(newUserIds);
 
     setSignaturePositions((prev) => {
@@ -88,10 +103,14 @@ const DocumentPage: React.FC<IPdfSignatureProps> = ({ context }) => {
         <UserSelector
           users={users}
           selectedUserIds={selectedUserIds}
+          onChange={handleUserChange}
           isSign={isSign}
           signType={signType}
           setSignType={setSignType}
-          onChange={handleUserChange}
+          selectedUserId={selectedUserId}
+          setSelectedUserId={setSelectedUserId}
+          onSign={handleSign}
+          isUserSigned={isUserSigned}
         />
       </div>
 
@@ -111,59 +130,57 @@ const DocumentPage: React.FC<IPdfSignatureProps> = ({ context }) => {
         </Document>
 
         {signType === "signature" &&
-          selectedUserIds.map((userId) => {
-            const position = signaturePositions[userId] || {
-              x: 100,
-              y: 100,
-              width: 250,
-              height: 100,
-            };
-
-            return (
-              <Rnd
-                key={userId}
-                size={{ width: position.width, height: position.height }}
-                position={{ x: position.x, y: position.y }}
-                onDragStop={(e, d) => {
-                  setSignaturePositions((prev) => ({
-                    ...prev,
-                    [userId]: {
-                      ...prev[userId],
-                      x: d.x,
-                      y: d.y,
-                      width: prev[userId]?.width ?? 250,
-                      height: prev[userId]?.height ?? 100,
-                    },
-                  }));
-                }}
-                onResizeStop={(e, direction, ref, delta, pos) => {
-                  setSignaturePositions((prev) => ({
-                    ...prev,
-                    [userId]: {
-                      x: pos.x,
-                      y: pos.y,
-                      width: parseInt(ref.style.width),
-                      height: parseInt(ref.style.height),
-                    },
-                  }));
-                }}
-                bounds="parent"
-                style={{
-                  border: "2px dashed #0078D4",
-                  background: "rgba(0, 120, 212, 0.1)",
-                  color: "#0078D4",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  fontWeight: "bold",
-                  cursor: "move",
-                  borderRadius: "4px",
-                }}
-              >
-                Tanda Tangan {userId}
-              </Rnd>
-            );
-          })}
+          signedUserIds.map((userId) => (
+            <Rnd
+              key={userId}
+              size={{
+                width: signaturePositions[userId]?.width || 250,
+                height: signaturePositions[userId]?.height || 100,
+              }}
+              position={{
+                x: signaturePositions[userId]?.x || 100,
+                y: signaturePositions[userId]?.y || 100,
+              }}
+              onDragStop={(e, d) => {
+                setSignaturePositions((prev) => ({
+                  ...prev,
+                  [userId]: {
+                    ...prev[userId],
+                    x: d.x,
+                    y: d.y,
+                    width: prev[userId]?.width ?? 250,
+                    height: prev[userId]?.height ?? 100,
+                  },
+                }));
+              }}
+              onResizeStop={(e, direction, ref, delta, pos) => {
+                setSignaturePositions((prev) => ({
+                  ...prev,
+                  [userId]: {
+                    x: pos.x,
+                    y: pos.y,
+                    width: parseInt(ref.style.width),
+                    height: parseInt(ref.style.height),
+                  },
+                }));
+              }}
+              bounds="parent"
+              style={{
+                border: "2px dashed #0078D4",
+                background: "rgba(0, 120, 212, 0.1)",
+                color: "#0078D4",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                fontWeight: "bold",
+                cursor: "move",
+                borderRadius: "4px",
+              }}
+            >
+              Ditandatangani oleh {userId}, Pada{" "}
+              {dayjs().format("DD MMM YYYY HH:mm")}
+            </Rnd>
+          ))}
       </div>
 
       <div className={styles.actionContainer}>
@@ -174,7 +191,7 @@ const DocumentPage: React.FC<IPdfSignatureProps> = ({ context }) => {
               : styles.enabledButton
           }`}
           disabled={selectedUserIds.length === 0}
-          onClick={handleSign}
+          onClick={handleNext}
         >
           {isSign ? "Kirim ke AkuSign" : "Lanjutkan"}
         </button>

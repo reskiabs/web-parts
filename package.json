@@ -26,6 +26,7 @@
     "@pnp/graph": "^4.14.0",
     "@pnp/logging": "^4.14.0",
     "@pnp/nodejs": "^4.14.0",
+    "dayjs": "^1.11.13",
     "lucide-react": "^0.525.0",
     "react": "17.0.1",
     "react-dom": "17.0.1",

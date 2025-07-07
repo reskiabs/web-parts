@@ -160,3 +160,8 @@
     background-color: #ffd6d6; /* merah hover */
   }
 }
+
+.disabledAction {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

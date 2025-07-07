@@ -19,6 +19,10 @@ interface UserSelectorProps {
   setSignType: React.Dispatch<
     React.SetStateAction<"signature" | "initials" | null>
   >;
+  selectedUserId: string | null;
+  setSelectedUserId: React.Dispatch<React.SetStateAction<string | null>>;
+  onSign?: () => void;
+  isUserSigned?: boolean;
 }
 
 const UserSelector: React.FC<UserSelectorProps> = ({
@@ -28,20 +32,21 @@ const UserSelector: React.FC<UserSelectorProps> = ({
   isSign = false,
   signType,
   setSignType,
+  selectedUserId,
+  setSelectedUserId,
+  onSign,
+  isUserSigned,
 }) => {
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState("");
-  const [selectedUserId, setSelectedUserId] = React.useState<string | null>(
-    null
-  );
 
   const handleCheckboxChange = (userId: string): void => {
     if (selectedUserIds.includes(userId)) {
       const updated = selectedUserIds.filter((id) => id !== userId);
       onChange(updated);
       if (selectedUserId === userId) {
-        setSelectedUserId(null); // unselect jika user yang dipilih dihapus
+        setSelectedUserId(null);
       }
     } else {
       onChange([...selectedUserIds, userId]);
@@ -192,10 +197,16 @@ const UserSelector: React.FC<UserSelectorProps> = ({
       {isSign && selectedUsers.length > 0 && (
         <div className={styles.actionGroup}>
           <button
+            disabled={!selectedUserId}
             className={`${styles.actionButton} ${
               signType === "signature" ? styles.activeAction : ""
-            }`}
-            onClick={() => setSignType("signature")}
+            } ${isUserSigned ? styles.disabledAction : ""}`}
+            onClick={() => {
+              if (selectedUserId) {
+                setSignType("signature");
+                onSign?.();
+              }
+            }}
           >
             <Signature size={18} />
             Tanda Tangani
