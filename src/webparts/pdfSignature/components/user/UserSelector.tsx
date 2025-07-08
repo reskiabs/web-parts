@@ -1,14 +1,9 @@
-import {
-  ChevronDown,
-  ChevronUp,
-  FilePenLine,
-  Search,
-  Signature,
-  X,
-} from "lucide-react";
-import * as React from "react";
+import React from "react";
 import { IUser } from "../../hooks/useUsers";
-import styles from "./UserSelector.module.scss";
+import { useUserSelector } from "../../hooks/useUserSelector";
+import ActionButtons from "./ActionButtons";
+import SelectedUsersList from "./SelectedUsersList";
+import UserSelectorDropdown from "./UserSelectorDropdown";
 
 interface UserSelectorProps {
   users: IUser[];
@@ -22,7 +17,6 @@ interface UserSelectorProps {
   selectedUserId: string | undefined;
   setSelectedUserId: React.Dispatch<React.SetStateAction<string | undefined>>;
   onSign?: () => void;
-  isUserSigned?: boolean;
 }
 
 const UserSelector: React.FC<UserSelectorProps> = ({
@@ -35,201 +29,63 @@ const UserSelector: React.FC<UserSelectorProps> = ({
   selectedUserId,
   setSelectedUserId,
   onSign,
-  isUserSigned,
 }) => {
-  const dropdownRef = React.useRef<HTMLDivElement>(null);
-  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
-  const [searchTerm, setSearchTerm] = React.useState("");
-
-  const handleCheckboxChange = (userId: string): void => {
-    if (selectedUserIds.includes(userId)) {
-      const updated = selectedUserIds.filter((id) => id !== userId);
-      onChange(updated);
-      if (selectedUserId === userId) {
-        setSelectedUserId(undefined);
-      }
-    } else {
-      onChange([...selectedUserIds, userId]);
-    }
-  };
-
-  const handleRemoveUser = (userId: string): void => {
-    const updated = selectedUserIds.filter((id) => id !== userId);
-    onChange(updated);
-    if (selectedUserId === userId) {
-      setSelectedUserId(undefined);
-    }
-  };
-
-  const handleUserClick = (userId: string): void => {
-    setSelectedUserId(selectedUserId === userId ? undefined : userId);
-  };
-
-  const selectedUsers = users.filter((u) => selectedUserIds.includes(u.id));
-
-  const filteredUsers = users.filter(
-    (user) =>
-      user.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.mail || "").toLowerCase().includes(searchTerm.toLowerCase())
+  const {
+    dropdownRef,
+    isDropdownOpen,
+    setIsDropdownOpen,
+    searchTerm,
+    setSearchTerm,
+    selectedUsers,
+    filteredUsers,
+    toggleUserSelection,
+    handleRemoveUser,
+  } = useUserSelector(
+    users,
+    selectedUserIds,
+    onChange,
+    selectedUserId,
+    setSelectedUserId
   );
 
-  React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent): void => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  const handleSignAction = (type: "signature" | "initials"): void => {
+    if (!selectedUserId) return;
+    setSignType(type);
+    onSign?.();
+  };
 
   return (
     <div>
       <h2>{isSign ? "Tanda Tangani" : "Undang Penandatangan"}</h2>
-
       {!isSign && (
-        <div className={styles.dropdownContainer} ref={dropdownRef}>
-          <button
-            type="button"
-            className={styles.dropdownToggle}
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          >
-            {selectedUsers.length > 0
-              ? `${selectedUsers.length} Pengguna dipilih`
-              : "Pilih pengguna"}
-            {isDropdownOpen ? (
-              <ChevronUp size={16} />
-            ) : (
-              <ChevronDown size={16} />
-            )}
-          </button>
-
-          {isDropdownOpen && (
-            <div className={styles.dropdownMenu}>
-              {users.length === 0 ? (
-                <p>Memuat data pengguna...</p>
-              ) : (
-                <>
-                  <div className={styles.searchBox}>
-                    <Search size={14} />
-                    <input
-                      type="text"
-                      placeholder="Cari pengguna..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className={styles.searchInput}
-                    />
-                  </div>
-
-                  <div className={styles.checkboxList}>
-                    {filteredUsers.length === 0 ? (
-                      <p className={styles.emptyText}>
-                        Pengguna tidak ditemukan
-                      </p>
-                    ) : (
-                      filteredUsers.map((user) => (
-                        <label key={user.id} className={styles.checkboxItem}>
-                          <input
-                            type="checkbox"
-                            checked={selectedUserIds.includes(user.id)}
-                            onChange={() => handleCheckboxChange(user.id)}
-                          />
-                          <strong>{user.displayName}</strong> (
-                          {user.mail || "no email"})
-                        </label>
-                      ))
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-        </div>
+        <UserSelectorDropdown
+          isDropdownOpen={isDropdownOpen}
+          setIsDropdownOpen={setIsDropdownOpen}
+          dropdownRef={dropdownRef}
+          users={users}
+          filteredUsers={filteredUsers}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          selectedUserIds={selectedUserIds}
+          toggleUserSelection={toggleUserSelection}
+          selectedUsersCount={selectedUsers.length}
+        />
       )}
-
-      {!isSign && selectedUsers.length > 0 && (
-        <ul className={styles.selectedUserList}>
-          {selectedUsers.map((user) => (
-            <li key={user.id} className={styles.selectedUserItem}>
-              <div>
-                <strong>{user.displayName}</strong>
-                <p>{user.mail || "no email"}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleRemoveUser(user.id)}
-                className={styles.removeButton}
-                title="Hapus"
-              >
-                <X size={16} />
-              </button>
-            </li>
-          ))}
-        </ul>
+      {selectedUsers.length > 0 && (
+        <SelectedUsersList
+          selectedUsers={selectedUsers}
+          isSign={isSign}
+          selectedUserId={selectedUserId}
+          setSelectedUserId={setSelectedUserId}
+          handleRemoveUser={handleRemoveUser}
+        />
       )}
-
       {isSign && selectedUsers.length > 0 && (
-        <ul className={styles.selectedUserList}>
-          {selectedUsers.map((user) => (
-            <li
-              key={user.id}
-              className={`${styles.selectedUserItem} ${
-                selectedUserId === user.id ? styles.selectedUserItemSign : ""
-              }`}
-              onClick={() => handleUserClick(user.id)}
-              style={{ cursor: "pointer" }}
-            >
-              <div>
-                <strong>{user.displayName}</strong>
-                <p>{user.mail || "no email"}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {isSign && selectedUsers.length > 0 && (
-        <div className={styles.actionGroup}>
-          <button
-            disabled={!selectedUserId}
-            className={`${styles.actionButton} 
-           ${signType === "signature" ? styles.activeAction : ""}
-           ${!selectedUserId ? styles.disabledAction : ""}
-         `}
-            onClick={() => {
-              if (selectedUserId) {
-                setSignType("signature");
-                onSign?.();
-              }
-            }}
-          >
-            <Signature size={18} />
-            Tanda Tangani
-          </button>
-
-          <button
-            disabled={!selectedUserId}
-            className={`${styles.actionButton} 
-           ${signType === "initials" ? styles.activeAction : ""}
-           ${!selectedUserId ? styles.disabledAction : ""}
-         `}
-            onClick={() => {
-              if (selectedUserId) {
-                setSignType("initials");
-                onSign?.();
-              }
-            }}
-          >
-            <FilePenLine size={18} />
-            Paraf
-          </button>
-        </div>
+        <ActionButtons
+          signType={signType}
+          selectedUserId={selectedUserId}
+          handleSignAction={handleSignAction}
+        />
       )}
     </div>
   );
