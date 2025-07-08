@@ -3,7 +3,7 @@ import { CircleArrowLeft } from "lucide-react";
 import * as React from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { Rnd } from "react-rnd";
-import { useLocation, useParams } from "react-router-dom";
+import { useHistory, useLocation, useParams } from "react-router-dom";
 import { IPdfSignatureProps } from "../../components/IPdfSignatureProps";
 import UserSelector from "../../components/user/UserSelector";
 import { ISharedFile, useSharedFiles } from "../../hooks/useSharedFiles";
@@ -21,6 +21,7 @@ interface LocationState {
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const DocumentPage: React.FC<IPdfSignatureProps> = ({ context }) => {
+  const history = useHistory();
   const { fileId } = useParams<RouteParams>();
   const location = useLocation<LocationState>();
   const { loading, getFileById } = useSharedFiles(context.msGraphClientFactory);
@@ -30,13 +31,14 @@ const DocumentPage: React.FC<IPdfSignatureProps> = ({ context }) => {
   const [signaturePositions, setSignaturePositions] = React.useState<
     Record<string, { x: number; y: number; width: number; height: number }>
   >({});
-  const [selectedUserId, setSelectedUserId] = React.useState<string | null>(
-    null
-  );
+
   const [isSign, setIsSign] = React.useState<boolean>(false);
   const [signType, setSignType] = React.useState<
-    "signature" | "initials" | null
-  >(null);
+    "signature" | "initials" | undefined
+  >(undefined);
+  const [selectedUserId, setSelectedUserId] = React.useState<
+    string | undefined
+  >(undefined);
 
   const [pageNumber, setPageNumber] = React.useState<number>(1);
 
@@ -46,6 +48,10 @@ const DocumentPage: React.FC<IPdfSignatureProps> = ({ context }) => {
 
   const topRef = React.useRef<HTMLDivElement>(null);
 
+  const getUserNameById = (id: string): string => {
+    const user = users.find((u) => u.id === id);
+    return user ? user.displayName : id;
+  };
   const handleNext = (): void => {
     setIsSign(true);
     topRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -58,6 +64,9 @@ const DocumentPage: React.FC<IPdfSignatureProps> = ({ context }) => {
     }
   };
 
+  const handleSend = (): void => {
+    history.push("/signed-documents");
+  };
   const handleUserChange = (newUserIds: string[]): void => {
     setSelectedUserIds(newUserIds);
 
@@ -177,7 +186,7 @@ const DocumentPage: React.FC<IPdfSignatureProps> = ({ context }) => {
                 borderRadius: "4px",
               }}
             >
-              Ditandatangani oleh {userId}, Pada{" "}
+              Ditandatangani oleh {getUserNameById(userId)}, Pada{" "}
               {dayjs().format("DD MMM YYYY HH:mm")}
             </Rnd>
           ))}
@@ -191,7 +200,7 @@ const DocumentPage: React.FC<IPdfSignatureProps> = ({ context }) => {
               : styles.enabledButton
           }`}
           disabled={selectedUserIds.length === 0}
-          onClick={handleNext}
+          onClick={isSign ? handleSend : handleNext}
         >
           {isSign ? "Kirim ke AkuSign" : "Lanjutkan"}
         </button>

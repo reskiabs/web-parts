@@ -15,12 +15,12 @@ interface UserSelectorProps {
   selectedUserIds: string[];
   onChange: (userIds: string[]) => void;
   isSign?: boolean;
-  signType: "signature" | "initials" | null;
+  signType: "signature" | "initials" | undefined;
   setSignType: React.Dispatch<
-    React.SetStateAction<"signature" | "initials" | null>
+    React.SetStateAction<"signature" | "initials" | undefined>
   >;
-  selectedUserId: string | null;
-  setSelectedUserId: React.Dispatch<React.SetStateAction<string | null>>;
+  selectedUserId: string | undefined;
+  setSelectedUserId: React.Dispatch<React.SetStateAction<string | undefined>>;
   onSign?: () => void;
   isUserSigned?: boolean;
 }
@@ -46,7 +46,7 @@ const UserSelector: React.FC<UserSelectorProps> = ({
       const updated = selectedUserIds.filter((id) => id !== userId);
       onChange(updated);
       if (selectedUserId === userId) {
-        setSelectedUserId(null);
+        setSelectedUserId(undefined);
       }
     } else {
       onChange([...selectedUserIds, userId]);
@@ -57,12 +57,12 @@ const UserSelector: React.FC<UserSelectorProps> = ({
     const updated = selectedUserIds.filter((id) => id !== userId);
     onChange(updated);
     if (selectedUserId === userId) {
-      setSelectedUserId(null);
+      setSelectedUserId(undefined);
     }
   };
 
   const handleUserClick = (userId: string): void => {
-    setSelectedUserId(selectedUserId === userId ? null : userId);
+    setSelectedUserId(selectedUserId === userId ? undefined : userId);
   };
 
   const selectedUsers = users.filter((u) => selectedUserIds.includes(u.id));
@@ -198,9 +198,10 @@ const UserSelector: React.FC<UserSelectorProps> = ({
         <div className={styles.actionGroup}>
           <button
             disabled={!selectedUserId}
-            className={`${styles.actionButton} ${
-              signType === "signature" ? styles.activeAction : ""
-            } ${isUserSigned ? styles.disabledAction : ""}`}
+            className={`${styles.actionButton} 
+           ${signType === "signature" ? styles.activeAction : ""}
+           ${!selectedUserId ? styles.disabledAction : ""}
+         `}
             onClick={() => {
               if (selectedUserId) {
                 setSignType("signature");
@@ -213,10 +214,17 @@ const UserSelector: React.FC<UserSelectorProps> = ({
           </button>
 
           <button
-            className={`${styles.actionButton} ${
-              signType === "initials" ? styles.activeAction : ""
-            }`}
-            onClick={() => setSignType("initials")}
+            disabled={!selectedUserId}
+            className={`${styles.actionButton} 
+           ${signType === "initials" ? styles.activeAction : ""}
+           ${!selectedUserId ? styles.disabledAction : ""}
+         `}
+            onClick={() => {
+              if (selectedUserId) {
+                setSignType("initials");
+                onSign?.();
+              }
+            }}
           >
             <FilePenLine size={18} />
             Paraf
