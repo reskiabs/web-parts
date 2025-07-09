@@ -1,7 +1,15 @@
-import { FileText, Filter, Search } from "lucide-react";
+import {
+  Clock,
+  FileText,
+  Filter,
+  Gift,
+  PlusCircle,
+  Search,
+} from "lucide-react";
 import * as React from "react";
+import { useHistory } from "react-router-dom";
 import { IPdfSignatureProps } from "../../components/IPdfSignatureProps";
-import styles from "./SignedDocuments.module.scss";
+import styles from "./HomePage.module.scss";
 
 const documents = [
   {
@@ -60,18 +68,75 @@ const documents = [
   },
 ];
 
-const SignedDocuments: React.FC<IPdfSignatureProps> = ({ context }) => {
+const HomePage: React.FC<IPdfSignatureProps> = ({ context }) => {
+  const history = useHistory();
+
+  const handleNext = (): void => {
+    history.push("/list-documents");
+  };
+
   return (
-    <div className={styles.signedDocuments}>
-      <h1 className={styles.headerTitle}>Dokumen</h1>
+    <div className={styles.HomePage}>
+      {/* Header Greeting */}
+      <div className={styles.headerBox}>
+        <div className={styles.leftSection}>
+          <div className={styles.greetingText}>
+            Halo, <span className={styles.userName}>John Doe</span>
+          </div>
+          <div className={styles.accountType}>Akun Personal</div>
 
-      {/* <div className={styles.tabs}>
-        <button className={`${styles.tab} ${styles.active}`}>Siap Sign</button>
-        <button className={styles.tab}>Dokumen Belum Selesai</button>
-        <button className={styles.tab}>Dokumen Selesai</button>
-        <button className={styles.tab}>Lainnya</button>
-      </div> */}
+          <button className={styles.activeTab} onClick={handleNext}>
+            <FileText size={18} /> Dokumen
+          </button>
+          <div className={styles.statsContainer}>
+            <div className={styles.statItem}>
+              <div className={styles.statLabel}>Saldo Tanda Tangan</div>
+              <div className={styles.statValue}>280</div>
+            </div>
+            <div className={styles.divider} />
+            <div className={styles.statItem}>
+              <div className={styles.statLabel}>Pemakaian Bulan Ini</div>
+              <div className={styles.statValue}>12</div>
+            </div>
+          </div>
+        </div>
 
+        <div className={styles.rightSection}>
+          <button>
+            <PlusCircle size={18} /> Top Up
+          </button>
+          <button>
+            <Gift size={18} /> Voucher
+          </button>
+          <button>
+            <Clock size={18} /> Riwayat
+          </button>
+        </div>
+      </div>
+
+      {/* Warning Banner */}
+      <div className={styles.warningBanner}>
+        <div>⚠️ Akun Anda belum memiliki Tanda Tangan atau Spesimen!</div>
+        <button>Tambah Sekarang</button>
+      </div>
+
+      {/* Tabs */}
+      <div className={styles.tabs}>
+        <button className={styles.tab}>
+          Siap Sign <span>12</span>
+        </button>
+        <button className={`${styles.tab} ${styles.activeTab}`}>
+          Belum Selesai <span>10</span>
+        </button>
+        <button className={styles.tab}>
+          Selesai <span>10</span>
+        </button>
+        <button className={styles.tab}>
+          Lainnya <span>6</span>
+        </button>
+      </div>
+
+      {/* Search & Filter */}
       <div className={styles.searchFilter}>
         <div className={styles.searchBox}>
           <Search size={16} />
@@ -82,6 +147,7 @@ const SignedDocuments: React.FC<IPdfSignatureProps> = ({ context }) => {
         </button>
       </div>
 
+      {/* Document Table */}
       <div className={styles.documentTable}>
         <div className={styles.tableHeader}>
           <span>Judul</span>
@@ -118,4 +184,4 @@ const SignedDocuments: React.FC<IPdfSignatureProps> = ({ context }) => {
   );
 };
 
-export default SignedDocuments;
+export default HomePage;

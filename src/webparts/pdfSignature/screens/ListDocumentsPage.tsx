@@ -5,7 +5,7 @@ import { IPdfSignatureProps } from "../components/IPdfSignatureProps";
 import styles from "../components/PdfSignature.module.scss";
 import { ISharedFile, useSharedFiles } from "../hooks/useSharedFiles";
 
-const HomePage: React.FC<IPdfSignatureProps> = ({ context }) => {
+const ListDocumentsPage: React.FC<IPdfSignatureProps> = ({ context }) => {
   const { sharedFiles } = useSharedFiles(context.msGraphClientFactory);
   const history = useHistory();
 
@@ -20,4 +20,4 @@ const HomePage: React.FC<IPdfSignatureProps> = ({ context }) => {
   );
 };
 
-export default HomePage;
+export default ListDocumentsPage;

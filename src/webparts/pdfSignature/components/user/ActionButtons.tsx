@@ -25,13 +25,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
       Tanda Tangani
     </button>
 
-    <button
-      disabled={!selectedUserId}
-      className={`${styles.actionButton} ${
-        signType === "initials" ? styles.activeAction : ""
-      } ${!selectedUserId ? styles.disabledAction : ""}`}
-      onClick={() => handleSignAction("initials")}
-    >
+    <button disabled={true} className={styles.actionButton}>
       <FilePenLine size={18} />
       Paraf
     </button>
