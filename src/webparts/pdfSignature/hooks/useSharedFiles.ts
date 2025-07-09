@@ -5,7 +5,18 @@ export interface ISharedFile {
   id: string;
   name: string;
   webUrl: string;
+  pages: number;
   lastModifiedDateTime: string;
+  lastModifiedBy: {
+    user: {
+      displayName: string;
+      email: string;
+    };
+  };
+  fileSystemInfo: {
+    createdDateTime: string;
+    lastModifiedDateTime: string;
+  };
 }
 
 interface UseSharedFilesResult {

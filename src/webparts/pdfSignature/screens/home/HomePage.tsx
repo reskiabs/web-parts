@@ -1,11 +1,4 @@
-import {
-  Clock,
-  FileText,
-  Filter,
-  Gift,
-  PlusCircle,
-  Search,
-} from "lucide-react";
+import { FileText, Search, SlidersHorizontal } from "lucide-react";
 import * as React from "react";
 import { useHistory } from "react-router-dom";
 import { IPdfSignatureProps } from "../../components/IPdfSignatureProps";
@@ -66,6 +59,24 @@ const documents = [
     expired: "15 Des 2024",
     time: "Pk. 09:10 WIB",
   },
+  {
+    title: "Surat Perjanjian Kerjasama",
+    pages: 4,
+    sender: "Bagus Dwi",
+    email: "bagus.dwi@email.com",
+    updated: "03 Jan 2025",
+    expired: "05 Jan 2025",
+    time: "Pk. 09:10 WIB",
+  },
+  {
+    title: "Invoice Pembelian Meja",
+    pages: 2,
+    sender: "Setiawati",
+    email: "setiawati@email.com",
+    updated: "25 Des 2024",
+    expired: "02 Jan 2025",
+    time: "Pk. 09:10 WIB",
+  },
 ];
 
 const HomePage: React.FC<IPdfSignatureProps> = ({ context }) => {
@@ -81,43 +92,14 @@ const HomePage: React.FC<IPdfSignatureProps> = ({ context }) => {
       <div className={styles.headerBox}>
         <div className={styles.leftSection}>
           <div className={styles.greetingText}>
-            Halo, <span className={styles.userName}>John Doe</span>
+            Halo, <span className={styles.userName}>Reski Abbas</span>
           </div>
-          <div className={styles.accountType}>Akun Personal</div>
-
-          <button className={styles.activeTab} onClick={handleNext}>
-            <FileText size={18} /> Dokumen
-          </button>
-          <div className={styles.statsContainer}>
-            <div className={styles.statItem}>
-              <div className={styles.statLabel}>Saldo Tanda Tangan</div>
-              <div className={styles.statValue}>280</div>
-            </div>
-            <div className={styles.divider} />
-            <div className={styles.statItem}>
-              <div className={styles.statLabel}>Pemakaian Bulan Ini</div>
-              <div className={styles.statValue}>12</div>
-            </div>
-          </div>
+          <div className={styles.accountType}>Welcome to AkuSign</div>
         </div>
 
         <div className={styles.rightSection}>
-          <button>
-            <PlusCircle size={18} /> Top Up
-          </button>
-          <button>
-            <Gift size={18} /> Voucher
-          </button>
-          <button>
-            <Clock size={18} /> Riwayat
-          </button>
+          <button onClick={handleNext}>Tanda Tangani Dokumen</button>
         </div>
-      </div>
-
-      {/* Warning Banner */}
-      <div className={styles.warningBanner}>
-        <div>⚠️ Akun Anda belum memiliki Tanda Tangan atau Spesimen!</div>
-        <button>Tambah Sekarang</button>
       </div>
 
       {/* Tabs */}
@@ -137,48 +119,50 @@ const HomePage: React.FC<IPdfSignatureProps> = ({ context }) => {
       </div>
 
       {/* Search & Filter */}
-      <div className={styles.searchFilter}>
-        <div className={styles.searchBox}>
-          <Search size={16} />
-          <input type="text" placeholder="Cari Dokumen" />
-        </div>
-        <button className={styles.filterButton}>
-          <Filter size={16} /> Filter
-        </button>
-      </div>
-
-      {/* Document Table */}
-      <div className={styles.documentTable}>
-        <div className={styles.tableHeader}>
-          <span>Judul</span>
-          <span>Pengirim</span>
-          <span>Diperbarui</span>
-          <span>Kadaluarsa</span>
+      <div className={styles.tableContainer}>
+        <div className={styles.searchFilter}>
+          <div className={styles.searchBox}>
+            <Search size={16} />
+            <input type="text" placeholder="Cari Dokumen" />
+          </div>
+          <button className={styles.filterButton}>
+            <SlidersHorizontal size={14} /> Filter
+          </button>
         </div>
 
-        {documents.map((doc, index) => (
-          <div className={styles.tableRow} key={index}>
-            <div className={styles.titleCell}>
-              <FileText size={20} />
-              <div>
-                <div className={styles.docTitle}>{doc.title}</div>
-                <div className={styles.docPages}>{doc.pages} Halaman</div>
+        {/* Document Table */}
+        <div className={styles.documentTable}>
+          <div className={styles.tableHeader}>
+            <span>Judul</span>
+            <span>Pengirim</span>
+            <span>Diperbarui</span>
+            <span>Kadaluarsa</span>
+          </div>
+
+          {documents.map((doc, index) => (
+            <div className={styles.tableRow} key={index}>
+              <div className={styles.titleCell}>
+                <FileText size={20} />
+                <div>
+                  <div className={styles.docTitle}>{doc.title}</div>
+                  <div className={styles.docPages}>{doc.pages} Halaman</div>
+                </div>
+              </div>
+              <div className={styles.senderCell}>
+                <div>{doc.sender}</div>
+                <div className={styles.email}>{doc.email}</div>
+              </div>
+              <div className={styles.dateCell}>
+                <div>{doc.updated}</div>
+                <div>{doc.time}</div>
+              </div>
+              <div className={styles.dateCell}>
+                <div>{doc.expired}</div>
+                <div>Pk. 12:00 WIB</div>
               </div>
             </div>
-            <div className={styles.senderCell}>
-              <div>{doc.sender}</div>
-              <div className={styles.email}>{doc.email}</div>
-            </div>
-            <div className={styles.dateCell}>
-              <div>{doc.updated}</div>
-              <div>{doc.time}</div>
-            </div>
-            <div className={styles.dateCell}>
-              <div>{doc.expired}</div>
-              <div>Pk. 12:00 WIB</div>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

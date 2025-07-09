@@ -1,0 +1,197 @@
+.container {
+  font-family: "Arial", sans-serif;
+  color: #333;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #b91c1c; // merah
+  margin-bottom: 32px;
+
+  span {
+    display: block;
+    font-weight: 600;
+  }
+}
+
+.section {
+  margin-bottom: 32px;
+  border: 1px solid #eee;
+  padding: 18px 25px;
+  border-radius: 10px;
+  .headerSection {
+    p {
+      margin: 0;
+    }
+    .docTitle {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .docSubtitle {
+      font-size: 12px;
+      font-weight: 500;
+      color: #666;
+    }
+  }
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+
+  h2 {
+    font-size: 16px;
+    font-weight: 600;
+  }
+}
+
+// .card {
+//   background: #fff;
+//   border: 1px solid #eee;
+//   padding: 100px 160px;
+//   border-radius: 8px;
+// }
+
+.ownerInfo {
+  margin-bottom: 12px;
+
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  .inputBox {
+    border: 1px solid #ddd;
+    padding: 12px;
+    border-radius: 6px;
+    background: #f9f9f9;
+
+    strong {
+      display: block;
+      font-weight: 600;
+    }
+
+    p {
+      font-size: 13px;
+      color: #777;
+      margin: 0;
+    }
+  }
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  margin-top: 12px;
+
+  input {
+    accent-color: #b91c1c;
+  }
+}
+
+.addButton {
+  background: none;
+  border: none;
+  color: #b91c1c;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 10px 20px;
+  margin-top: 12px;
+}
+
+.signerRow {
+  display: flex;
+  align-items: flex-start; // penting agar label & text sejajar atas
+  gap: 16px;
+  padding: 12px 0;
+  position: relative;
+}
+
+.leftLabel {
+  min-width: 120px; // Lebar label tetap
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+  }
+}
+
+.rightInfo {
+  flex: 1;
+
+  strong {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    color: #111;
+  }
+
+  p {
+    font-size: 13px;
+    color: #888;
+    margin: 2px 0 0 0;
+  }
+}
+
+.removeButton {
+  background: none;
+  border: none;
+  color: #d32f2f;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.divider {
+  border-bottom: 1px solid #eee;
+}
+
+.addPhaseButton {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #b91c1c;
+  border-radius: 50px;
+  background: none;
+  color: #b91c1c;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.backButton {
+  background: #eee;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nextButton {
+  background: #2563eb; // warna biru
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
