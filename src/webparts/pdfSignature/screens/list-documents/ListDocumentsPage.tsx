@@ -9,11 +9,20 @@ import styles from "./ListDocumentsPage.module.scss";
 
 const ListDocumentsPage: React.FC<IPdfSignatureProps> = ({ context }) => {
   const { sharedFiles } = useSharedFiles(context.msGraphClientFactory);
-  const { setSelectedDocument } = useSignatureStore();
+  const { setCurrentSignature } = useSignatureStore();
   const history = useHistory();
 
-  const handleNextPage = (name: string, webUrl: string): void => {
-    setSelectedDocument({ name, webUrl });
+  const handleNextPage = (id: string, name: string, webUrl: string): void => {
+    setCurrentSignature({
+      id,
+      name,
+      webUrl,
+      phases: [{ id: 1, signers: [{}] }],
+      signStatus: {},
+      signaturePositions: {},
+      activeSignerIds: [],
+    });
+
     history.push("/signature-assignment");
   };
 
@@ -54,7 +63,7 @@ const ListDocumentsPage: React.FC<IPdfSignatureProps> = ({ context }) => {
                 <div className={styles.senderCell}>
                   <div>{doc.lastModifiedBy.user.displayName}</div>
                   <div className={styles.email}>
-                    {doc.lastModifiedBy.user.email.toLocaleLowerCase()}
+                    {doc.lastModifiedBy.user.email.toLowerCase()}
                   </div>
                 </div>
                 <div className={styles.dateCell}>
@@ -71,7 +80,7 @@ const ListDocumentsPage: React.FC<IPdfSignatureProps> = ({ context }) => {
                 <div className={styles.dateCell}>
                   <button
                     className={styles.signButton}
-                    onClick={() => handleNextPage(doc.name, doc.webUrl)}
+                    onClick={() => handleNextPage(doc.id, doc.name, doc.webUrl)}
                   >
                     <Signature size={16} />
                   </button>

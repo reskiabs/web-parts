@@ -2,6 +2,7 @@ import { FileText, Search, SlidersHorizontal } from "lucide-react";
 import * as React from "react";
 import { useHistory } from "react-router-dom";
 import { IPdfSignatureProps } from "../../components/IPdfSignatureProps";
+import { useCurrentUser } from "../../hooks/useCurrentUser";
 import styles from "./HomePage.module.scss";
 
 const documents = [
@@ -81,6 +82,7 @@ const documents = [
 
 const HomePage: React.FC<IPdfSignatureProps> = ({ context }) => {
   const history = useHistory();
+  const { user } = useCurrentUser(context.msGraphClientFactory);
 
   const handleNext = (): void => {
     history.push("/list-documents");
@@ -92,7 +94,7 @@ const HomePage: React.FC<IPdfSignatureProps> = ({ context }) => {
       <div className={styles.headerBox}>
         <div className={styles.leftSection}>
           <div className={styles.greetingText}>
-            Halo, <span className={styles.userName}>Reski Abbas</span>
+            Halo, <span className={styles.userName}>{user?.displayName}</span>
           </div>
           <div className={styles.accountType}>Welcome to AkuSign</div>
         </div>

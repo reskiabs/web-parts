@@ -2,7 +2,10 @@ import { CircleCheck } from "lucide-react";
 import React from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useHistory } from "react-router-dom";
-import { useSignatureStore } from "../../store/signatureStore";
+import {
+  SignaturePosition,
+  useSignatureStore,
+} from "../../store/signatureStore";
 import styles from "./DocumentSignerPage.module.scss";
 import SignatureOverlay from "./SignatureOverlay";
 
@@ -10,16 +13,23 @@ pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.vers
 
 const DocumentSignerPage: React.FC = () => {
   const history = useHistory();
-  const {
-    phases,
-    signStatus,
-    setSignStatus,
-    signaturePositions,
-    setSignaturePosition,
-    activeSignerIds,
-    setActiveSignerIds,
-    selectedDocument,
-  } = useSignatureStore();
+  const { currentSignature, setCurrentSignature, addSignedDocument } =
+    useSignatureStore();
+
+  const phases = currentSignature?.phases ?? [];
+  const signStatus = currentSignature?.signStatus ?? {};
+  const signaturePositions = currentSignature?.signaturePositions ?? {};
+  const activeSignerIds = currentSignature?.activeSignerIds ?? [];
+  const document = currentSignature;
+
+  const updateCurrentSignature = (
+    updated: Partial<typeof currentSignature>
+  ): void => {
+    setCurrentSignature({
+      ...currentSignature!,
+      ...updated,
+    });
+  };
 
   const handlePreviousPage = (): void => history.goBack();
 
@@ -35,11 +45,14 @@ const DocumentSignerPage: React.FC = () => {
     signerId?: string
   ): void => {
     const key = `${phaseId}-${signerIndex}`;
-    setSignStatus(key, true);
 
-    if (signerId && !activeSignerIds.includes(signerId)) {
-      setActiveSignerIds([...activeSignerIds, signerId]);
-    }
+    updateCurrentSignature({
+      signStatus: { ...signStatus, [key]: true },
+      activeSignerIds:
+        signerId && !activeSignerIds.includes(signerId)
+          ? [...activeSignerIds, signerId]
+          : activeSignerIds,
+    });
   };
 
   const getUserNameById = (id: string): string => {
@@ -50,15 +63,39 @@ const DocumentSignerPage: React.FC = () => {
     return "-";
   };
 
+  const handleSetSignaturePosition = (
+    userId: string,
+    position: SignaturePosition
+  ): void => {
+    updateCurrentSignature({
+      signaturePositions: {
+        ...signaturePositions,
+        [userId]: position,
+      },
+    });
+  };
+
   const handleSubmit = (): void => {
-    useSignatureStore.getState().clearPhases();
+    if (!currentSignature) return;
+
+    addSignedDocument({
+      id: currentSignature.id,
+      name: currentSignature.name,
+      webUrl: currentSignature.webUrl,
+      phases: phases,
+      signaturePositions: signaturePositions,
+    });
+
+    setCurrentSignature(undefined);
+
     alert("Dokumen dikirim ke AkuSign!");
     history.push("/");
   };
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>{selectedDocument?.name}</h1>
+      <h1 className={styles.title}>{document?.name}</h1>
+
       {phases.map((phase, phaseIndex) => {
         const prevPhaseDone =
           phaseIndex === 0 || isPhaseCompleted(phases[phaseIndex - 1].id);
@@ -133,7 +170,7 @@ const DocumentSignerPage: React.FC = () => {
       })}
 
       <div className={styles.pdfContainer} style={{ position: "relative" }}>
-        <Document file={selectedDocument?.webUrl}>
+        <Document file={document?.webUrl}>
           <Page
             pageNumber={1}
             width={800}
@@ -146,7 +183,7 @@ const DocumentSignerPage: React.FC = () => {
           signedUserIds={activeSignerIds}
           getUserNameById={getUserNameById}
           signaturePositions={signaturePositions}
-          setSignaturePosition={setSignaturePosition}
+          setSignaturePosition={handleSetSignaturePosition}
         />
       </div>
 
