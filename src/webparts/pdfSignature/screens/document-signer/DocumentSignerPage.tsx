@@ -1,26 +1,24 @@
 import { CircleCheck } from "lucide-react";
-import React, { useState } from "react";
-import { Document, Page } from "react-pdf";
+import React from "react";
+import { Document, Page, pdfjs } from "react-pdf";
 import { useHistory } from "react-router-dom";
+import SignatureOverlay from "../../components/document/SignatureOverlay";
 import { useSignatureStore } from "../../store/signatureStore";
-import SignatureOverlay from "../document/SignatureOverlay";
 import styles from "./DocumentSignerPage.module.scss";
 
-interface SignaturePosition {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 const DocumentSignerPage: React.FC = () => {
   const history = useHistory();
-  const { phases, signStatus, setSignStatus } = useSignatureStore();
-
-  const [activeSignerIds, setActiveSignerIds] = useState<string[]>([]);
-  const [signaturePositions, setSignaturePositions] = useState<
-    Record<string, SignaturePosition>
-  >({});
+  const {
+    phases,
+    signStatus,
+    setSignStatus,
+    signaturePositions,
+    setSignaturePosition,
+    activeSignerIds,
+    setActiveSignerIds,
+  } = useSignatureStore();
 
   const handlePreviousPage = (): void => history.goBack();
 
@@ -39,7 +37,7 @@ const DocumentSignerPage: React.FC = () => {
     setSignStatus(key, true);
 
     if (signerId && !activeSignerIds.includes(signerId)) {
-      setActiveSignerIds((prev) => [...prev, signerId]);
+      setActiveSignerIds([...activeSignerIds, signerId]);
     }
   };
 
@@ -49,6 +47,12 @@ const DocumentSignerPage: React.FC = () => {
       if (signer) return signer.name || "-";
     }
     return "-";
+  };
+
+  const handleSubmit = (): void => {
+    useSignatureStore.getState().clearPhases();
+    alert("Dokumen dikirim ke AkuSign!");
+    history.push("/");
   };
 
   return (
@@ -100,7 +104,9 @@ const DocumentSignerPage: React.FC = () => {
                             isSigned ? styles.disabledButton : styles.signButton
                           }
                           disabled={isDisabledPhase || isSigned}
-                          onClick={() => handleSign(phase.id, signerIndex)}
+                          onClick={() =>
+                            handleSign(phase.id, signerIndex, signer.id)
+                          }
                         >
                           {isSigned
                             ? "Tanda Tangan Selesai"
@@ -136,9 +142,9 @@ const DocumentSignerPage: React.FC = () => {
 
         <SignatureOverlay
           signedUserIds={activeSignerIds}
-          signaturePositions={signaturePositions}
-          setSignaturePositions={setSignaturePositions}
           getUserNameById={getUserNameById}
+          signaturePositions={signaturePositions}
+          setSignaturePosition={setSignaturePosition}
         />
       </div>
 
@@ -146,7 +152,9 @@ const DocumentSignerPage: React.FC = () => {
         <button className={styles.backButton} onClick={handlePreviousPage}>
           Kembali
         </button>
-        <button className={styles.nextButton}>Kirim ke AkuSign</button>
+        <button className={styles.nextButton} onClick={handleSubmit}>
+          Kirim ke AkuSign
+        </button>
       </div>
     </div>
   );

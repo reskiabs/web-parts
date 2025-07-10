@@ -12,16 +12,14 @@ interface SignaturePosition {
 interface SignatureOverlayProps {
   signedUserIds: string[];
   signaturePositions: Record<string, SignaturePosition>;
-  setSignaturePositions: React.Dispatch<
-    React.SetStateAction<Record<string, SignaturePosition>>
-  >;
+  setSignaturePosition: (userId: string, position: SignaturePosition) => void;
   getUserNameById: (id: string) => string;
 }
 
 const SignatureOverlay: React.FC<SignatureOverlayProps> = ({
   signedUserIds,
   signaturePositions,
-  setSignaturePositions,
+  setSignaturePosition,
   getUserNameById,
 }) => {
   return (
@@ -40,27 +38,19 @@ const SignatureOverlay: React.FC<SignatureOverlayProps> = ({
             size={{ width: position.width, height: position.height }}
             position={{ x: position.x, y: position.y }}
             onDragStop={(e, d) => {
-              setSignaturePositions((prev) => ({
-                ...prev,
-                [userId]: {
-                  ...prev[userId],
-                  x: d.x,
-                  y: d.y,
-                  width: prev[userId]?.width ?? 250,
-                  height: prev[userId]?.height ?? 100,
-                },
-              }));
+              setSignaturePosition(userId, {
+                ...position,
+                x: d.x,
+                y: d.y,
+              });
             }}
             onResizeStop={(e, direction, ref, delta, pos) => {
-              setSignaturePositions((prev) => ({
-                ...prev,
-                [userId]: {
-                  x: pos.x,
-                  y: pos.y,
-                  width: parseInt(ref.style.width, 10),
-                  height: parseInt(ref.style.height, 10),
-                },
-              }));
+              setSignaturePosition(userId, {
+                x: pos.x,
+                y: pos.y,
+                width: parseInt(ref.style.width, 10),
+                height: parseInt(ref.style.height, 10),
+              });
             }}
             bounds="parent"
             style={{
@@ -72,7 +62,8 @@ const SignatureOverlay: React.FC<SignatureOverlayProps> = ({
               alignItems: "center",
               fontWeight: "bold",
               cursor: "move",
-              borderRadius: "4px",
+              borderRadius: "8px",
+              padding: "10px",
             }}
           >
             Ditandatangani oleh {getUserNameById(userId)}, Pada{" "}
