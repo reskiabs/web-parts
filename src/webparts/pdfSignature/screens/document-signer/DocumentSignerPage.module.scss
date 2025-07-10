@@ -3,18 +3,6 @@
   color: #333;
 }
 
-.title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #b91c1c; // merah
-  margin-bottom: 32px;
-
-  span {
-    display: block;
-    font-weight: 600;
-  }
-}
-
 .section {
   margin-bottom: 32px;
   border: 1px solid #eee;
@@ -38,6 +26,11 @@
   }
 }
 
+.disabledPhase {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .sectionHeader {
   display: flex;
   justify-content: space-between;
@@ -48,55 +41,6 @@
     font-size: 16px;
     font-weight: 600;
   }
-}
-
-.ownerInfo {
-  margin-bottom: 12px;
-
-  label {
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 4px;
-    display: block;
-  }
-
-  .inputBox {
-    border: 1px solid #ddd;
-    padding: 12px;
-    border-radius: 6px;
-    background: #f9f9f9;
-
-    strong {
-      display: block;
-      font-weight: 600;
-    }
-
-    p {
-      font-size: 13px;
-      color: #777;
-      margin: 0;
-    }
-  }
-}
-
-.checkboxLabel {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  margin-top: 12px;
-
-  input {
-    accent-color: #b91c1c;
-  }
-}
-
-.addButton {
-  background: none;
-  border: none;
-  color: #b91c1c;
-  font-weight: 600;
-  cursor: pointer;
 }
 
 .card {
@@ -141,35 +85,51 @@
   }
 }
 
-.userSelect {
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  max-width: 300px;
-  font-size: 14px;
+.buttonInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.removeButton {
-  background: none;
+.signButton {
+  background: #4a7bbe;
+  color: white;
   border: none;
-  color: #d32f2f;
+  padding: 10px 18px;
+  border-radius: 25px;
+  font-weight: 500;
+  font-size: 11px;
   cursor: pointer;
-  padding: 4px;
+}
+
+.disabledButton {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+  background: #aaaaaa;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 25px;
+  font-weight: 500;
+  font-size: 11px;
+  cursor: pointer;
+  color: #666;
 }
 
 .divider {
   border-bottom: 1px solid #eee;
 }
 
-.addPhaseButton {
+.pdfContainer {
+  position: relative;
   width: 100%;
-  padding: 12px;
-  border: 2px solid #b91c1c;
-  border-radius: 50px;
-  background: none;
-  color: #b91c1c;
-  font-weight: bold;
-  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid #aaaaaa;
+  border-radius: 10px;
 }
 
 .footer {
@@ -185,13 +145,11 @@
   background: white;
   padding: 10px 24px;
   border-radius: 25px;
-  font-weight: 500;
-  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
 }
 
 .nextButton {
-  width: 120px;
   background: #4a7bbe;
   color: white;
   border: none;

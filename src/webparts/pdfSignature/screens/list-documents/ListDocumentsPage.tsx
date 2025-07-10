@@ -3,16 +3,15 @@ import { FileText, Signature, SlidersHorizontal } from "lucide-react";
 import * as React from "react";
 import { useHistory } from "react-router-dom";
 import { IPdfSignatureProps } from "../../components/IPdfSignatureProps";
-import { ISharedFile, useSharedFiles } from "../../hooks/useSharedFiles";
+import { useSharedFiles } from "../../hooks/useSharedFiles";
 import styles from "./ListDocumentsPage.module.scss";
 
 const ListDocumentsPage: React.FC<IPdfSignatureProps> = ({ context }) => {
   const { sharedFiles } = useSharedFiles(context.msGraphClientFactory);
   const history = useHistory();
 
-  const handlePreview = (file: ISharedFile): void => {
+  const handleNextPage = (): void => {
     history.push("/signature-assignment");
-    // history.push(`/document/${file.id}`, { file });
   };
 
   return (
@@ -69,7 +68,7 @@ const ListDocumentsPage: React.FC<IPdfSignatureProps> = ({ context }) => {
                 <div className={styles.dateCell}>
                   <button
                     className={styles.signButton}
-                    onClick={() => handlePreview(doc)}
+                    onClick={handleNextPage}
                   >
                     <Signature size={16} />
                   </button>

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Route, HashRouter as Router, Switch } from "react-router-dom";
+import DocumentSignerPage from "../screens/document-signer/DocumentSignerPage";
 import DocumentPage from "../screens/document/DocumentPage";
 import HomePage from "../screens/home/HomePage";
 import ListDocumentsPage from "../screens/list-documents/ListDocumentsPage";
@@ -18,6 +19,9 @@ const PdfSignature: React.FC<IPdfSignatureProps> = (props) => {
         </Route>
         <Route exact path="/signature-assignment">
           <SignatureAssignment {...props} />
+        </Route>
+        <Route exact path="/document-signer">
+          <DocumentSignerPage {...props} />
         </Route>
         <Route path="/document/:fileId">
           <DocumentPage {...props} />

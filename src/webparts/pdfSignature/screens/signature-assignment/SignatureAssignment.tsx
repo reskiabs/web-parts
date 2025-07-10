@@ -1,8 +1,80 @@
 import { X } from "lucide-react";
 import React from "react";
+import { useHistory } from "react-router-dom";
+import { IPdfSignatureProps } from "../../components/IPdfSignatureProps";
+import { IUser, useUsers } from "../../hooks/useUsers";
+import { useSignatureStore } from "../../store/signatureStore";
 import styles from "./SignatureAssignment.module.scss";
 
-const SignatureAssignment: React.FC = () => {
+const SignatureAssignment: React.FC<IPdfSignatureProps> = ({ context }) => {
+  const history = useHistory();
+  const { users, loading } = useUsers(context.msGraphClientFactory);
+
+  const { phases, setPhases } = useSignatureStore();
+
+  React.useEffect(() => {
+    if (phases.length === 0) {
+      setPhases([{ id: 1, signers: [{}] }]);
+    }
+  }, [phases, setPhases]);
+
+  const handleAddPhase = (): void => {
+    const newPhaseId = phases.length + 1;
+    setPhases([...phases, { id: newPhaseId, signers: [{}] }]);
+  };
+
+  const handleAddSigner = (phaseId: number): void => {
+    setPhases((prev) =>
+      prev.map((phase) =>
+        phase.id === phaseId
+          ? { ...phase, signers: [...phase.signers, {}] }
+          : phase
+      )
+    );
+  };
+
+  const handleRemoveSigner = (phaseId: number, signerIndex: number): void => {
+    setPhases((prev) =>
+      prev.map((phase) =>
+        phase.id === phaseId
+          ? {
+              ...phase,
+              signers: phase.signers.filter((_, idx) => idx !== signerIndex),
+            }
+          : phase
+      )
+    );
+  };
+
+  const handleSelectUser = (
+    phaseId: number,
+    signerIndex: number,
+    user: IUser
+  ): void => {
+    setPhases((prev) =>
+      prev.map((phase) =>
+        phase.id === phaseId
+          ? {
+              ...phase,
+              signers: phase.signers.map((signer, idx) =>
+                idx === signerIndex
+                  ? {
+                      id: user.id,
+                      name: user.displayName,
+                      email: user.mail,
+                      selected: true,
+                    }
+                  : signer
+              ),
+            }
+          : phase
+      )
+    );
+  };
+
+  const handlePreviousPage = (): void => history.goBack();
+  const handleNextPage = (): void => history.push("/document-signer");
+
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>
@@ -28,61 +100,97 @@ const SignatureAssignment: React.FC = () => {
             </div>
           </div>
         </div>
-        <label className={styles.checkboxLabel}>
-          <input type="checkbox" defaultChecked />
-          Saya ingin menandatangani dokumen
-        </label>
       </section>
 
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <div className={styles.headerSection}>
-            <p className={styles.docTitle}>Penandatangan</p>
-            <p className={styles.docSubtitle}>
-              Data Persetujuan diperlukan jika dokumen yang diunggah membutuhkan
-              persetujuan
-            </p>
-          </div>
-          <button className={styles.addButton}>+ PENERIMA BARU</button>
-        </div>
-        <div className={styles.card}>
-          <div className={styles.signerRow}>
-            <div className={styles.leftLabel}>
-              <label>Penandatangan</label>
+      {phases.map((phase) => (
+        <section className={styles.section} key={phase.id}>
+          <div className={styles.sectionHeader}>
+            <div className={styles.headerSection}>
+              <p className={styles.docTitle}>
+                Penandatangan {phases.length > 1 ? `(Fase ${phase.id})` : ""}
+              </p>
+              <p className={styles.docSubtitle}>
+                Data Persetujuan diperlukan jika dokumen yang diunggah
+                membutuhkan persetujuan
+              </p>
             </div>
-            <div className={styles.rightInfo}>
-              <strong>Reski Abbas</strong>
-              <p>reski.abbas@idas.id</p>
-            </div>
-            <button className={styles.removeButton}>
-              <X size={16} />
+            <button
+              className={styles.addButton}
+              onClick={() => handleAddSigner(phase.id)}
+            >
+              + PENERIMA BARU
             </button>
           </div>
+          <div className={styles.card}>
+            {phase.signers.map((signer, signerIndex) => (
+              <React.Fragment key={signerIndex}>
+                <div className={styles.signerRow}>
+                  <div className={styles.leftLabel}>
+                    <label>Penandatangan</label>
+                  </div>
 
-          <div className={styles.divider} />
+                  <div className={styles.rightInfo}>
+                    {!signer.selected ? (
+                      <select
+                        className={styles.userSelect}
+                        disabled={loading}
+                        onChange={(e) => {
+                          const selectedUser = users.find(
+                            (u) => u.id === e.target.value
+                          );
+                          if (selectedUser)
+                            handleSelectUser(
+                              phase.id,
+                              signerIndex,
+                              selectedUser
+                            );
+                        }}
+                      >
+                        <option value="">Pilih Penandatangan</option>
+                        {users.map((user) => (
+                          <option key={user.id} value={user.id}>
+                            {user.displayName} ({user.mail})
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <>
+                        <strong>{signer.name}</strong>
+                        <p>{signer.email}</p>
+                      </>
+                    )}
+                  </div>
 
-          <div className={styles.signerRow}>
-            <div className={styles.leftLabel}>
-              <label>Penandatangan</label>
-            </div>
-            <div className={styles.rightInfo}>
-              <strong>Niko Indrawan</strong>
-              <p>niko.indrawan@email.com</p>
-            </div>
-            <button className={styles.removeButton}>
-              <X size={16} />
-            </button>
+                  {phase.signers.length > 1 && (
+                    <button
+                      className={styles.removeButton}
+                      onClick={() => handleRemoveSigner(phase.id, signerIndex)}
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+
+                {signerIndex !== phase.signers.length - 1 && (
+                  <div className={styles.divider} />
+                )}
+              </React.Fragment>
+            ))}
           </div>
-        </div>
-      </section>
+        </section>
+      ))}
 
-      <button className={styles.addPhaseButton}>
+      <button className={styles.addPhaseButton} onClick={handleAddPhase}>
         Tambah Fase Penandatangan
       </button>
 
       <div className={styles.footer}>
-        <button className={styles.backButton}>Kembali</button>
-        <button className={styles.nextButton}>Lanjut</button>
+        <button className={styles.backButton} onClick={handlePreviousPage}>
+          Kembali
+        </button>
+        <button className={styles.nextButton} onClick={handleNextPage}>
+          Lanjut
+        </button>
       </div>
     </div>
   );
