@@ -2,9 +2,9 @@ import { CircleCheck } from "lucide-react";
 import React from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useHistory } from "react-router-dom";
-import SignatureOverlay from "../../components/document/SignatureOverlay";
 import { useSignatureStore } from "../../store/signatureStore";
 import styles from "./DocumentSignerPage.module.scss";
+import SignatureOverlay from "./SignatureOverlay";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
