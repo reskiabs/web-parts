@@ -4,13 +4,16 @@ import * as React from "react";
 import { useHistory } from "react-router-dom";
 import { IPdfSignatureProps } from "../../components/IPdfSignatureProps";
 import { useSharedFiles } from "../../hooks/useSharedFiles";
+import { useSignatureStore } from "../../store/signatureStore";
 import styles from "./ListDocumentsPage.module.scss";
 
 const ListDocumentsPage: React.FC<IPdfSignatureProps> = ({ context }) => {
   const { sharedFiles } = useSharedFiles(context.msGraphClientFactory);
+  const { setSelectedDocument } = useSignatureStore();
   const history = useHistory();
 
-  const handleNextPage = (): void => {
+  const handleNextPage = (name: string, webUrl: string): void => {
+    setSelectedDocument({ name, webUrl });
     history.push("/signature-assignment");
   };
 
@@ -68,7 +71,7 @@ const ListDocumentsPage: React.FC<IPdfSignatureProps> = ({ context }) => {
                 <div className={styles.dateCell}>
                   <button
                     className={styles.signButton}
-                    onClick={handleNextPage}
+                    onClick={() => handleNextPage(doc.name, doc.webUrl)}
                   >
                     <Signature size={16} />
                   </button>
