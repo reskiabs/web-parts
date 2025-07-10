@@ -1,16 +1,23 @@
 import { X } from "lucide-react";
 import React from "react";
 import { useHistory } from "react-router-dom";
+import Select from "react-select";
 import { IPdfSignatureProps } from "../../components/IPdfSignatureProps";
 import { IUser, useUsers } from "../../hooks/useUsers";
 import { useSignatureStore } from "../../store/signatureStore";
 import styles from "./SignatureAssignment.module.scss";
 
+interface UserOption {
+  value: string;
+  label: string;
+  user: IUser;
+}
+
 const SignatureAssignment: React.FC<IPdfSignatureProps> = ({ context }) => {
   const history = useHistory();
   const { users, loading } = useUsers(context.msGraphClientFactory);
 
-  const { phases, setPhases } = useSignatureStore();
+  const { phases, setPhases, selectedDocument } = useSignatureStore();
 
   React.useEffect(() => {
     if (phases.length === 0) {
@@ -77,10 +84,7 @@ const SignatureAssignment: React.FC<IPdfSignatureProps> = ({ context }) => {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>
-        Invoice Pemesanan Lampu oleh <br />
-        <span>PT. Aneka Jaya Abadi untuk Ruangan Megasa</span>
-      </h1>
+      <h1 className={styles.title}>{selectedDocument?.name}</h1>
 
       <section className={styles.section}>
         <div className={styles.headerSection}>
@@ -128,31 +132,29 @@ const SignatureAssignment: React.FC<IPdfSignatureProps> = ({ context }) => {
                   <div className={styles.leftLabel}>
                     <label>Penandatangan</label>
                   </div>
-
                   <div className={styles.rightInfo}>
                     {!signer.selected ? (
-                      <select
+                      <Select<UserOption, false>
                         className={styles.userSelect}
-                        disabled={loading}
-                        onChange={(e) => {
-                          const selectedUser = users.find(
-                            (u) => u.id === e.target.value
-                          );
-                          if (selectedUser)
+                        classNamePrefix="react-select"
+                        isLoading={loading}
+                        options={users.map((user) => ({
+                          value: user.id,
+                          label: `${user.displayName} (${user.mail})`,
+                          user,
+                        }))}
+                        placeholder="Pilih Penandatangan"
+                        onChange={(selectedOption: UserOption | null) => {
+                          if (selectedOption) {
                             handleSelectUser(
                               phase.id,
                               signerIndex,
-                              selectedUser
+                              selectedOption.user
                             );
+                          }
                         }}
-                      >
-                        <option value="">Pilih Penandatangan</option>
-                        {users.map((user) => (
-                          <option key={user.id} value={user.id}>
-                            {user.displayName} ({user.mail})
-                          </option>
-                        ))}
-                      </select>
+                        isSearchable
+                      />
                     ) : (
                       <>
                         <strong>{signer.name}</strong>

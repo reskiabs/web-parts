@@ -18,6 +18,7 @@ const DocumentSignerPage: React.FC = () => {
     setSignaturePosition,
     activeSignerIds,
     setActiveSignerIds,
+    selectedDocument,
   } = useSignatureStore();
 
   const handlePreviousPage = (): void => history.goBack();
@@ -57,6 +58,7 @@ const DocumentSignerPage: React.FC = () => {
 
   return (
     <div className={styles.container}>
+      <h1 className={styles.title}>{selectedDocument?.name}</h1>
       {phases.map((phase, phaseIndex) => {
         const prevPhaseDone =
           phaseIndex === 0 || isPhaseCompleted(phases[phaseIndex - 1].id);
@@ -72,7 +74,7 @@ const DocumentSignerPage: React.FC = () => {
             <div className={styles.sectionHeader}>
               <div className={styles.headerSection}>
                 <p className={styles.docTitle}>
-                  Penandatangan (Fase {phaseIndex + 1})
+                  Atur Tanda Tangan (Fase {phaseIndex + 1})
                 </p>
                 <p className={styles.docSubtitle}>
                   Atur tanda tangan untuk setiap penerima di fase ini
@@ -131,7 +133,7 @@ const DocumentSignerPage: React.FC = () => {
       })}
 
       <div className={styles.pdfContainer} style={{ position: "relative" }}>
-        <Document file="https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf">
+        <Document file={selectedDocument?.webUrl}>
           <Page
             pageNumber={1}
             width={800}

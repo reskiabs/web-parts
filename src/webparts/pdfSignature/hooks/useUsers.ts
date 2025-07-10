@@ -1,4 +1,4 @@
-import { MSGraphClientV3 } from "@microsoft/sp-http";
+import { MSGraphClientFactory, MSGraphClientV3 } from "@microsoft/sp-http";
 import { useEffect, useState } from "react";
 
 export interface IUser {
@@ -7,7 +7,9 @@ export interface IUser {
   mail: string;
 }
 
-export const useUsers = (msGraphClientFactory: any) => {
+export const useUsers = (
+  msGraphClientFactory: MSGraphClientFactory
+): { users: IUser[]; loading: boolean } => {
   const [users, setUsers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,7 +23,7 @@ export const useUsers = (msGraphClientFactory: any) => {
         setUsers(response.value);
         setLoading(false);
       })
-      .catch((err: any) => {
+      .catch((err: unknown) => {
         console.error("Failed to fetch users", err);
         setLoading(false);
       });

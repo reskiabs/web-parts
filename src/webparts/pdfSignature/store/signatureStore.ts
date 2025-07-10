@@ -30,7 +30,8 @@ interface SignatureState {
   signStatus: Record<string, boolean>;
   signaturePositions: Record<string, SignaturePosition>;
   activeSignerIds: string[];
-  selectedDocument: SelectedDocument | null;
+  selectedDocument?: SelectedDocument; // ⬅️ Gunakan optional (undefined)
+
   setPhases: (value: Phase[] | ((prev: Phase[]) => Phase[])) => void;
   setSignStatus: (key: string, value: boolean) => void;
   setSignaturePosition: (userId: string, position: SignaturePosition) => void;
@@ -46,7 +47,7 @@ export const useSignatureStore = create<SignatureState>()(
       signStatus: {},
       signaturePositions: {},
       activeSignerIds: [],
-      selectedDocument: null, // ⬅️ Tambahkan selectedDocument
+      selectedDocument: undefined,
 
       setPhases: (update) =>
         set((state) => ({
@@ -82,7 +83,7 @@ export const useSignatureStore = create<SignatureState>()(
           signStatus: {},
           signaturePositions: {},
           activeSignerIds: [],
-          selectedDocument: null, // ⬅️ Reset juga selectedDocument
+          selectedDocument: undefined,
         }),
     }),
     {
@@ -92,7 +93,7 @@ export const useSignatureStore = create<SignatureState>()(
         signStatus: state.signStatus,
         signaturePositions: state.signaturePositions,
         activeSignerIds: state.activeSignerIds,
-        selectedDocument: state.selectedDocument, // ⬅️ Persist selectedDocument
+        selectedDocument: state.selectedDocument,
       }),
     }
   )
