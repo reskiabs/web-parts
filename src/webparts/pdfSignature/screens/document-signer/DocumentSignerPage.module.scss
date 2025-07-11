@@ -5,7 +5,7 @@
 .title {
   font-size: 24px;
   font-weight: bold;
-  color: #4a7bbe;
+  color: #b91c1c;
   margin-bottom: 32px;
 
   span {
@@ -168,4 +168,17 @@
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
+}
+
+.disabledNextButton {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+  background: #cccccc;
+  color: #ffffff;
+  padding: 10px 24px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 15px;
+  border: none;
 }

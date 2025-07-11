@@ -17,22 +17,35 @@ const SignatureAssignment: React.FC<IPdfSignatureProps> = ({ context }) => {
   const history = useHistory();
   const { users, loading } = useUsers(context.msGraphClientFactory);
 
-  const { phases, setPhases, selectedDocument } = useSignatureStore();
+  const { currentSignature, setCurrentSignature } = useSignatureStore();
+
+  const phases = currentSignature?.phases ?? [];
+  const document = currentSignature;
 
   React.useEffect(() => {
-    if (phases.length === 0) {
-      setPhases([{ id: 1, signers: [{}] }]);
+    if (phases.length === 0 && currentSignature) {
+      setCurrentSignature({
+        ...currentSignature,
+        phases: [{ id: 1, signers: [{}] }],
+      });
     }
-  }, [phases, setPhases]);
+  }, [phases, setCurrentSignature, currentSignature]);
+
+  const updatePhases = (newPhases: typeof phases): void => {
+    setCurrentSignature({
+      ...currentSignature!,
+      phases: newPhases,
+    });
+  };
 
   const handleAddPhase = (): void => {
     const newPhaseId = phases.length + 1;
-    setPhases([...phases, { id: newPhaseId, signers: [{}] }]);
+    updatePhases([...phases, { id: newPhaseId, signers: [{}] }]);
   };
 
   const handleAddSigner = (phaseId: number): void => {
-    setPhases((prev) =>
-      prev.map((phase) =>
+    updatePhases(
+      phases.map((phase) =>
         phase.id === phaseId
           ? { ...phase, signers: [...phase.signers, {}] }
           : phase
@@ -41,8 +54,8 @@ const SignatureAssignment: React.FC<IPdfSignatureProps> = ({ context }) => {
   };
 
   const handleRemoveSigner = (phaseId: number, signerIndex: number): void => {
-    setPhases((prev) =>
-      prev.map((phase) =>
+    updatePhases(
+      phases.map((phase) =>
         phase.id === phaseId
           ? {
               ...phase,
@@ -58,8 +71,8 @@ const SignatureAssignment: React.FC<IPdfSignatureProps> = ({ context }) => {
     signerIndex: number,
     user: IUser
   ): void => {
-    setPhases((prev) =>
-      prev.map((phase) =>
+    updatePhases(
+      phases.map((phase) =>
         phase.id === phaseId
           ? {
               ...phase,
@@ -84,7 +97,7 @@ const SignatureAssignment: React.FC<IPdfSignatureProps> = ({ context }) => {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>{selectedDocument?.name}</h1>
+      <h1 className={styles.title}>{document?.name}</h1>
 
       <section className={styles.section}>
         <div className={styles.headerSection}>
@@ -114,8 +127,7 @@ const SignatureAssignment: React.FC<IPdfSignatureProps> = ({ context }) => {
                 Penandatangan {phases.length > 1 ? `(Fase ${phase.id})` : ""}
               </p>
               <p className={styles.docSubtitle}>
-                Data Persetujuan diperlukan jika dokumen yang diunggah
-                membutuhkan persetujuan
+                Data Persetujuan diperlukan jika dokumen membutuhkan persetujuan
               </p>
             </div>
             <button
@@ -136,7 +148,6 @@ const SignatureAssignment: React.FC<IPdfSignatureProps> = ({ context }) => {
                     {!signer.selected ? (
                       <Select<UserOption, false>
                         className={styles.userSelect}
-                        classNamePrefix="react-select"
                         isLoading={loading}
                         options={users.map((user) => ({
                           value: user.id,
@@ -162,7 +173,6 @@ const SignatureAssignment: React.FC<IPdfSignatureProps> = ({ context }) => {
                       </>
                     )}
                   </div>
-
                   {phase.signers.length > 1 && (
                     <button
                       className={styles.removeButton}
@@ -172,7 +182,6 @@ const SignatureAssignment: React.FC<IPdfSignatureProps> = ({ context }) => {
                     </button>
                   )}
                 </div>
-
                 {signerIndex !== phase.signers.length - 1 && (
                   <div className={styles.divider} />
                 )}

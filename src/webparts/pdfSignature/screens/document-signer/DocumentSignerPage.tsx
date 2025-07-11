@@ -1,25 +1,39 @@
+import dayjs from "dayjs";
 import { CircleCheck } from "lucide-react";
 import React from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useHistory } from "react-router-dom";
-import { useSignatureStore } from "../../store/signatureStore";
+import { IPdfSignatureProps } from "../../components/IPdfSignatureProps";
+import { useCurrentUser } from "../../hooks/useCurrentUser";
+import {
+  SignaturePosition,
+  useSignatureStore,
+} from "../../store/signatureStore";
 import styles from "./DocumentSignerPage.module.scss";
 import SignatureOverlay from "./SignatureOverlay";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
-const DocumentSignerPage: React.FC = () => {
+const DocumentSignerPage: React.FC<IPdfSignatureProps> = ({ context }) => {
   const history = useHistory();
-  const {
-    phases,
-    signStatus,
-    setSignStatus,
-    signaturePositions,
-    setSignaturePosition,
-    activeSignerIds,
-    setActiveSignerIds,
-    selectedDocument,
-  } = useSignatureStore();
+  const { currentSignature, setCurrentSignature, addSignedDocument } =
+    useSignatureStore();
+  const { user } = useCurrentUser(context.msGraphClientFactory);
+
+  const phases = currentSignature?.phases ?? [];
+  const signStatus = currentSignature?.signStatus ?? {};
+  const signaturePositions = currentSignature?.signaturePositions ?? {};
+  const activeSignerIds = currentSignature?.activeSignerIds ?? [];
+  const document = currentSignature;
+
+  const updateCurrentSignature = (
+    updated: Partial<typeof currentSignature>
+  ): void => {
+    setCurrentSignature({
+      ...currentSignature!,
+      ...updated,
+    });
+  };
 
   const handlePreviousPage = (): void => history.goBack();
 
@@ -35,11 +49,14 @@ const DocumentSignerPage: React.FC = () => {
     signerId?: string
   ): void => {
     const key = `${phaseId}-${signerIndex}`;
-    setSignStatus(key, true);
 
-    if (signerId && !activeSignerIds.includes(signerId)) {
-      setActiveSignerIds([...activeSignerIds, signerId]);
-    }
+    updateCurrentSignature({
+      signStatus: { ...signStatus, [key]: true },
+      activeSignerIds:
+        signerId && !activeSignerIds.includes(signerId)
+          ? [...activeSignerIds, signerId]
+          : activeSignerIds,
+    });
   };
 
   const getUserNameById = (id: string): string => {
@@ -50,15 +67,53 @@ const DocumentSignerPage: React.FC = () => {
     return "-";
   };
 
+  const handleSetSignaturePosition = (
+    userId: string,
+    position: SignaturePosition
+  ): void => {
+    updateCurrentSignature({
+      signaturePositions: {
+        ...currentSignature?.signaturePositions,
+        [userId]: position,
+      },
+    });
+  };
+
   const handleSubmit = (): void => {
-    useSignatureStore.getState().clearPhases();
+    if (!currentSignature) return;
+
+    const { id, name, webUrl, phases, signaturePositions } = currentSignature;
+
+    const senderName = user?.displayName || "";
+    const senderEmail = user?.mail || "";
+    const expiredDate = dayjs().add(3, "day").toISOString();
+
+    addSignedDocument({
+      id,
+      name,
+      webUrl,
+      phases,
+      signaturePositions,
+      sender_name: senderName,
+      sender_email: senderEmail,
+      expired_at: expiredDate,
+    });
+
+    setCurrentSignature(undefined);
     alert("Dokumen dikirim ke AkuSign!");
     history.push("/");
   };
 
+  const isAllPhasesCompleted = (): boolean => {
+    return phases.every((phase) =>
+      phase.signers.every((_, idx) => signStatus[`${phase.id}-${idx}`])
+    );
+  };
+
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>{selectedDocument?.name}</h1>
+      <h1 className={styles.title}>{document?.name}</h1>
+
       {phases.map((phase, phaseIndex) => {
         const prevPhaseDone =
           phaseIndex === 0 || isPhaseCompleted(phases[phaseIndex - 1].id);
@@ -133,7 +188,7 @@ const DocumentSignerPage: React.FC = () => {
       })}
 
       <div className={styles.pdfContainer} style={{ position: "relative" }}>
-        <Document file={selectedDocument?.webUrl}>
+        <Document file={document?.webUrl}>
           <Page
             pageNumber={1}
             width={800}
@@ -144,9 +199,12 @@ const DocumentSignerPage: React.FC = () => {
 
         <SignatureOverlay
           signedUserIds={activeSignerIds}
-          getUserNameById={getUserNameById}
           signaturePositions={signaturePositions}
-          setSignaturePosition={setSignaturePosition}
+          setSignaturePosition={handleSetSignaturePosition}
+          getUserText={(userId) => ({
+            label: "Atur tanda tangan untuk",
+            name: getUserNameById(userId),
+          })}
         />
       </div>
 
@@ -154,7 +212,15 @@ const DocumentSignerPage: React.FC = () => {
         <button className={styles.backButton} onClick={handlePreviousPage}>
           Kembali
         </button>
-        <button className={styles.nextButton} onClick={handleSubmit}>
+        <button
+          className={
+            isAllPhasesCompleted()
+              ? styles.nextButton
+              : styles.disabledNextButton
+          }
+          onClick={handleSubmit}
+          disabled={!isAllPhasesCompleted()}
+        >
           Kirim ke AkuSign
         </button>
       </div>

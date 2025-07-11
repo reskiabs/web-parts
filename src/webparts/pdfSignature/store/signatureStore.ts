@@ -1,99 +1,105 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-type Signer = {
+// ✅ Type Definitions
+export type Signer = {
   id?: string;
   name?: string;
   email?: string;
   selected?: boolean;
 };
 
-type Phase = {
+export type Phase = {
   id: number;
   signers: Signer[];
 };
 
-type SignaturePosition = {
+export type SignaturePosition = {
   x: number;
   y: number;
   width: number;
   height: number;
 };
 
-type SelectedDocument = {
+export type DocumentData = {
+  id: string;
   name: string;
   webUrl: string;
+  phases: Phase[];
+  signaturePositions: Record<string, SignaturePosition>;
+  sender_name?: string;
+  sender_email?: string;
+  expired_at?: string;
+  signed_by?: string[]; // ⬅️ NEW: Menyimpan array userId penandatangan
+  is_signed?: boolean; // ⬅️ NEW: Menyimpan status signed secara global
 };
 
-interface SignatureState {
+export type CurrentSignatureData = {
+  id: string;
+  name: string;
+  webUrl: string;
   phases: Phase[];
-  signStatus: Record<string, boolean>;
   signaturePositions: Record<string, SignaturePosition>;
+  signStatus: Record<string, boolean>;
   activeSignerIds: string[];
-  selectedDocument?: SelectedDocument; // ⬅️ Gunakan optional (undefined)
+};
 
-  setPhases: (value: Phase[] | ((prev: Phase[]) => Phase[])) => void;
-  setSignStatus: (key: string, value: boolean) => void;
-  setSignaturePosition: (userId: string, position: SignaturePosition) => void;
-  setActiveSignerIds: (ids: string[]) => void;
-  setSelectedDocument: (doc: SelectedDocument) => void;
-  clearPhases: () => void;
+// ✅ State Interface
+interface SignatureState {
+  currentSignature?: CurrentSignatureData;
+  signedDocuments: DocumentData[];
+
+  setCurrentSignature: (doc: CurrentSignatureData | undefined) => void;
+  updateCurrentSignature: (partial: Partial<CurrentSignatureData>) => void;
+  clearCurrentSignature: () => void;
+
+  addSignedDocument: (doc: DocumentData) => void;
+  markDocumentAsSigned: (docId: string, userId: string) => void; // ⬅️ NEW
 }
 
+// ✅ Zustand Store
 export const useSignatureStore = create<SignatureState>()(
   persist(
-    (set) => ({
-      phases: [],
-      signStatus: {},
-      signaturePositions: {},
-      activeSignerIds: [],
-      selectedDocument: undefined,
+    (set, get) => ({
+      currentSignature: undefined,
+      signedDocuments: [],
 
-      setPhases: (update) =>
+      setCurrentSignature: (doc) => set({ currentSignature: doc }),
+
+      updateCurrentSignature: (partial) =>
         set((state) => ({
-          phases: typeof update === "function" ? update(state.phases) : update,
+          currentSignature: state.currentSignature
+            ? { ...state.currentSignature, ...partial }
+            : undefined,
         })),
 
-      setSignStatus: (key, value) =>
+      clearCurrentSignature: () => set({ currentSignature: undefined }),
+
+      addSignedDocument: (doc) =>
         set((state) => ({
-          signStatus: { ...state.signStatus, [key]: value },
+          signedDocuments: [...state.signedDocuments, doc],
         })),
 
-      setSignaturePosition: (userId, position) =>
+      markDocumentAsSigned: (docId, userId) =>
         set((state) => ({
-          signaturePositions: {
-            ...state.signaturePositions,
-            [userId]: position,
-          },
+          signedDocuments: state.signedDocuments.map((doc) =>
+            doc.id === docId
+              ? {
+                  ...doc,
+                  is_signed: true,
+                  signed_by: doc.signed_by
+                    ? Array.from(new Set([...doc.signed_by, userId]))
+                    : [userId],
+                }
+              : doc
+          ),
         })),
-
-      setActiveSignerIds: (ids) =>
-        set(() => ({
-          activeSignerIds: ids,
-        })),
-
-      setSelectedDocument: (doc) =>
-        set(() => ({
-          selectedDocument: doc,
-        })),
-
-      clearPhases: () =>
-        set({
-          phases: [],
-          signStatus: {},
-          signaturePositions: {},
-          activeSignerIds: [],
-          selectedDocument: undefined,
-        }),
     }),
     {
       name: "signature-storage",
       partialize: (state) => ({
-        phases: state.phases,
-        signStatus: state.signStatus,
-        signaturePositions: state.signaturePositions,
-        activeSignerIds: state.activeSignerIds,
-        selectedDocument: state.selectedDocument,
+        currentSignature: state.currentSignature,
+        signedDocuments: state.signedDocuments,
       }),
     }
   )

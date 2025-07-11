@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import React from "react";
 import { Rnd } from "react-rnd";
 
@@ -13,14 +12,14 @@ interface SignatureOverlayProps {
   signedUserIds: string[];
   signaturePositions: Record<string, SignaturePosition>;
   setSignaturePosition: (userId: string, position: SignaturePosition) => void;
-  getUserNameById: (id: string) => string;
+  getUserText: (userId: string) => { label: string; name: string };
 }
 
 const SignatureOverlay: React.FC<SignatureOverlayProps> = ({
   signedUserIds,
   signaturePositions,
   setSignaturePosition,
-  getUserNameById,
+  getUserText,
 }) => {
   return (
     <>
@@ -31,6 +30,8 @@ const SignatureOverlay: React.FC<SignatureOverlayProps> = ({
           width: 250,
           height: 100,
         };
+
+        const { label, name } = getUserText(userId);
 
         return (
           <Rnd
@@ -54,20 +55,31 @@ const SignatureOverlay: React.FC<SignatureOverlayProps> = ({
             }}
             bounds="parent"
             style={{
-              border: "2px dashed #0078D4",
-              background: "rgba(0, 120, 212, 0.1)",
-              color: "#0078D4",
+              border: "2px dashed #999",
+              background: "rgba(200, 200, 200, 0.1)",
+              color: "#AAAAAA",
               display: "flex",
+              flexDirection: "column",
               justifyContent: "center",
               alignItems: "center",
-              fontWeight: "bold",
               cursor: "move",
               borderRadius: "8px",
               padding: "10px",
+              textAlign: "center",
+              whiteSpace: "pre-line",
+              gap: "14px",
             }}
           >
-            Ditandatangani oleh {getUserNameById(userId)}, Pada{" "}
-            {dayjs().format("DD MMM YYYY HH:mm")}
+            <div
+              style={{ fontSize: "12px", color: "#AAAAAA", fontWeight: "400" }}
+            >
+              {label}
+            </div>
+            <div
+              style={{ fontSize: "20px", fontWeight: "600", color: "#000000" }}
+            >
+              {name}
+            </div>
           </Rnd>
         );
       })}
