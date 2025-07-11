@@ -5,6 +5,7 @@ import { IPdfSignatureProps } from "../../components/IPdfSignatureProps";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { useSignatureStore } from "../../store/signatureStore";
 import SignatureOverlay from "../document-signer/SignatureOverlay";
+import ModalOtp from "./ModalOtp";
 import styles from "./SignedDocumentPage.module.scss";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
@@ -20,6 +21,7 @@ const SignedDocumentsPage: React.FC<IPdfSignatureProps> = ({ context }) => {
   const signaturePosition = document?.signaturePositions?.[userId || ""];
 
   const [isSigned, setIsSigned] = React.useState(false);
+  const [showOtpModal, setShowOtpModal] = React.useState(false);
 
   const handleBack = (): void => {
     history.goBack();
@@ -30,11 +32,14 @@ const SignedDocumentsPage: React.FC<IPdfSignatureProps> = ({ context }) => {
   };
 
   const handleSubmit = (): void => {
+    setShowOtpModal(true);
+  };
+
+  const handleVerifyOtp = (otpValue: string): void => {
     if (!document || !userId) return;
 
     markDocumentAsSigned(document.id, userId);
-
-    alert("Dokumen berhasil ditandatangani!");
+    setShowOtpModal(false);
     history.push("/");
   };
 
@@ -80,6 +85,13 @@ const SignedDocumentsPage: React.FC<IPdfSignatureProps> = ({ context }) => {
           {isSigned ? "Selesai" : "Tanda Tangani"}
         </button>
       </div>
+      {showOtpModal && (
+        <ModalOtp
+          email={user?.mail || user?.displayName || "-"}
+          onClose={() => setShowOtpModal(false)}
+          onVerify={handleVerifyOtp}
+        />
+      )}
     </div>
   );
 };
