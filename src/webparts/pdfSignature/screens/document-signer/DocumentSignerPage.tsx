@@ -1,7 +1,10 @@
+import dayjs from "dayjs";
 import { CircleCheck } from "lucide-react";
 import React from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useHistory } from "react-router-dom";
+import { IPdfSignatureProps } from "../../components/IPdfSignatureProps";
+import { useCurrentUser } from "../../hooks/useCurrentUser";
 import {
   SignaturePosition,
   useSignatureStore,
@@ -11,10 +14,11 @@ import SignatureOverlay from "./SignatureOverlay";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
-const DocumentSignerPage: React.FC = () => {
+const DocumentSignerPage: React.FC<IPdfSignatureProps> = ({ context }) => {
   const history = useHistory();
   const { currentSignature, setCurrentSignature, addSignedDocument } =
     useSignatureStore();
+  const { user } = useCurrentUser(context.msGraphClientFactory);
 
   const phases = currentSignature?.phases ?? [];
   const signStatus = currentSignature?.signStatus ?? {};
@@ -69,7 +73,7 @@ const DocumentSignerPage: React.FC = () => {
   ): void => {
     updateCurrentSignature({
       signaturePositions: {
-        ...signaturePositions,
+        ...currentSignature?.signaturePositions,
         [userId]: position,
       },
     });
@@ -78,16 +82,24 @@ const DocumentSignerPage: React.FC = () => {
   const handleSubmit = (): void => {
     if (!currentSignature) return;
 
+    const { id, name, webUrl, phases, signaturePositions } = currentSignature;
+
+    const senderName = user?.displayName || "";
+    const senderEmail = user?.mail || "";
+    const expiredDate = dayjs().add(3, "day").toISOString();
+
     addSignedDocument({
-      id: currentSignature.id,
-      name: currentSignature.name,
-      webUrl: currentSignature.webUrl,
-      phases: phases,
-      signaturePositions: signaturePositions,
+      id,
+      name,
+      webUrl,
+      phases,
+      signaturePositions,
+      sender_name: senderName,
+      sender_email: senderEmail,
+      expired_at: expiredDate,
     });
 
     setCurrentSignature(undefined);
-
     alert("Dokumen dikirim ke AkuSign!");
     history.push("/");
   };
@@ -181,9 +193,12 @@ const DocumentSignerPage: React.FC = () => {
 
         <SignatureOverlay
           signedUserIds={activeSignerIds}
-          getUserNameById={getUserNameById}
           signaturePositions={signaturePositions}
           setSignaturePosition={handleSetSignaturePosition}
+          getUserText={(userId) => ({
+            label: "Atur tanda tangan untuk",
+            name: getUserNameById(userId),
+          })}
         />
       </div>
 

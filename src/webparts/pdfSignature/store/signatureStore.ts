@@ -27,6 +27,11 @@ export type DocumentData = {
   webUrl: string;
   phases: Phase[];
   signaturePositions: Record<string, SignaturePosition>;
+  sender_name?: string;
+  sender_email?: string;
+  expired_at?: string;
+  signed_by?: string[]; // ⬅️ NEW: Menyimpan array userId penandatangan
+  is_signed?: boolean; // ⬅️ NEW: Menyimpan status signed secara global
 };
 
 export type CurrentSignatureData = {
@@ -41,7 +46,7 @@ export type CurrentSignatureData = {
 
 // ✅ State Interface
 interface SignatureState {
-  currentSignature?: CurrentSignatureData; // 🔑 Perbaiki di sini
+  currentSignature?: CurrentSignatureData;
   signedDocuments: DocumentData[];
 
   setCurrentSignature: (doc: CurrentSignatureData | undefined) => void;
@@ -49,6 +54,7 @@ interface SignatureState {
   clearCurrentSignature: () => void;
 
   addSignedDocument: (doc: DocumentData) => void;
+  markDocumentAsSigned: (docId: string, userId: string) => void; // ⬅️ NEW
 }
 
 // ✅ Zustand Store
@@ -72,6 +78,21 @@ export const useSignatureStore = create<SignatureState>()(
       addSignedDocument: (doc) =>
         set((state) => ({
           signedDocuments: [...state.signedDocuments, doc],
+        })),
+
+      markDocumentAsSigned: (docId, userId) =>
+        set((state) => ({
+          signedDocuments: state.signedDocuments.map((doc) =>
+            doc.id === docId
+              ? {
+                  ...doc,
+                  is_signed: true,
+                  signed_by: doc.signed_by
+                    ? Array.from(new Set([...doc.signed_by, userId]))
+                    : [userId],
+                }
+              : doc
+          ),
         })),
     }),
     {
