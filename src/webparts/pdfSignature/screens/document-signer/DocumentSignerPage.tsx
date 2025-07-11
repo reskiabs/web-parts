@@ -104,6 +104,12 @@ const DocumentSignerPage: React.FC<IPdfSignatureProps> = ({ context }) => {
     history.push("/");
   };
 
+  const isAllPhasesCompleted = (): boolean => {
+    return phases.every((phase) =>
+      phase.signers.every((_, idx) => signStatus[`${phase.id}-${idx}`])
+    );
+  };
+
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>{document?.name}</h1>
@@ -206,7 +212,15 @@ const DocumentSignerPage: React.FC<IPdfSignatureProps> = ({ context }) => {
         <button className={styles.backButton} onClick={handlePreviousPage}>
           Kembali
         </button>
-        <button className={styles.nextButton} onClick={handleSubmit}>
+        <button
+          className={
+            isAllPhasesCompleted()
+              ? styles.nextButton
+              : styles.disabledNextButton
+          }
+          onClick={handleSubmit}
+          disabled={!isAllPhasesCompleted()}
+        >
           Kirim ke AkuSign
         </button>
       </div>

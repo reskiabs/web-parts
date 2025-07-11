@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import styles from "./ModalOtp.module.scss";
 
@@ -53,11 +54,20 @@ const ModalOtp: React.FC<ModalOtpProps> = ({ email, onClose, onVerify }) => {
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
-        <button className={styles.closeButton} onClick={onClose}>
+        {/* <button className={styles.closeButton} onClick={onClose}>
           ✕
-        </button>
-        <h2>Konfirmasi OTP</h2>
-        <p>Masukkan kode OTP yang telah terkirim ke email {maskedEmail}</p>
+        </button> */}
+        <div className={styles.header}>
+          <div>
+            <div className={styles.title}>Konfirmasi OTP</div>
+            <div className={styles.subtitle}>
+              Masukkan kode OTP yang telah terkirim ke email {maskedEmail}
+            </div>
+          </div>
+          <button onClick={onClose}>
+            <X size={18} />
+          </button>
+        </div>
 
         <div className={styles.otpContainer}>
           {otp.map((digit, index) => (

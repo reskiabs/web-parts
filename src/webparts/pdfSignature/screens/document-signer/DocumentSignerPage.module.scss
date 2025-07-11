@@ -169,3 +169,16 @@
   font-size: 15px;
   cursor: pointer;
 }
+
+.disabledNextButton {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+  background: #cccccc;
+  color: #ffffff;
+  padding: 10px 24px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 15px;
+  border: none;
+}
